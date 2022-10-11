@@ -7,13 +7,19 @@ namespace m1
 {
     class Lab1 : public gfxc::SimpleScene
     {
-     public:
+    public:
         Lab1();
         ~Lab1();
 
         void Init() override;
 
-     private:
+    private:
+        GLfloat red, green, blue;
+        glm::vec3 position;
+        GLfloat moveSpeed;
+        GLboolean toggleColor;
+        std::string currMesh;
+
         void FrameStart() override;
         void Update(float deltaTimeSeconds) override;
         void FrameEnd() override;
@@ -26,8 +32,5 @@ namespace m1
         void OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) override;
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
-
-        // TODO(student): Class variables go here
-
     };
 }   // namespace m1
