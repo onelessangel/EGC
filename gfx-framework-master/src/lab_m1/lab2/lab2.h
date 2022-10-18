@@ -1,8 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <cmath>
 
 #include "components/simple_scene.h"
+
+#define NO_TRIANGLES   100
 
 
 namespace m1
@@ -16,6 +19,11 @@ namespace m1
         void Init() override;
 
      private:
+        glm::vec3 position;
+        glm::vec3 t_position;
+        glm::vec3 sqr_position;
+        glm::vec3 circle_position;
+
         void CreateMesh(const char *name, const std::vector<VertexFormat> &vertices, const std::vector<unsigned int> &indices);
 
         void FrameStart() override;
