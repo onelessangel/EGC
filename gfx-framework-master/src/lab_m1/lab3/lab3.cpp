@@ -155,38 +155,6 @@ void Lab3::Update(float deltaTimeSeconds)
 
         RenderMesh2D(meshes["square3"], shaders["VertexColor"], modelMatrix);
     }
-
-    // BONUS - bouncing square
-    {
-        float pointX = 600, pointY = 550;
-        angularStep += deltaTimeSeconds;
-        modelMatrix *= transform2D::Translate(pointX, pointY);
-        modelMatrix *= transform2D::Rotate(angularStep);
-        modelMatrix *= transform2D::Translate(-pointX, -pointY);
-
-
-        /*float pointX = 600, pointY = 500;
-        modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(400, 500);
-
-        angularStep += deltaTimeSeconds;
-
-        modelMatrix *= transform2D::Translate(pointX + 400, 500);
-        modelMatrix *= transform2D::Rotate(angularStep);
-        modelMatrix *= transform2D::Translate(-(pointX - 400), -500);*/
-
-        /*angularStep += deltaTimeSeconds;
-        modelMatrix *= transform2D::Translate(cx + SQUARE_SIDE / 2, cy + SQUARE_SIDE / 2);
-        modelMatrix *= transform2D::Rotate(-angularStep);
-        modelMatrix *= transform2D::Translate(-(cx + SQUARE_SIDE / 2), -(cy + +SQUARE_SIDE / 2));*/
-
-        // translateX += deltaTimeSeconds * 0.1f;
-        // modelMatrix *= transform2D::Translate(translateX, translateY);
-
-
-
-        RenderMesh2D(meshes["square4"], shaders["VertexColor"], modelMatrix);
-    }
 }
 
 
