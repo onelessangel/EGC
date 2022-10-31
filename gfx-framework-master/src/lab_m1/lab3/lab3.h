@@ -1,7 +1,11 @@
 #pragma once
 
+#include <cmath>
 #include "components/simple_scene.h"
 
+#define MOVE_SPEED  150
+#define RES_LIMIT   .5f
+#define SQUARE_SIDE 100
 
 namespace m1
 {
@@ -33,6 +37,7 @@ namespace m1
         float translateX, translateY;
         float scaleX, scaleY;
         float angularStep;
+        bool moveRight;
 
         // TODO(student): If you need any other class variables, define them here.
 

@@ -39,10 +39,12 @@ void Lab3::Init()
     glm::vec3 corner = glm::vec3(0, 0, 0);
     float squareSide = 100;
 
-    // TODO(student): Compute coordinates of a square's center, and store
+    // Compute coordinates of a square's center, and store
     // then in the `cx` and `cy` class variables (see the header). Use
     // `corner` and `squareSide`. These two class variables will be used
     // in the `Update()` function. Think about it, why do you need them?
+    cx = squareSide / 2 + corner.x;
+    cy = squareSide / 2 + corner.y;
 
     // Initialize tx and ty (the translation steps)
     translateX = 0;
@@ -55,6 +57,9 @@ void Lab3::Init()
     // Initialize angularStep
     angularStep = 0;
 
+    // Initialize direction movement
+    moveRight = true;
+
     Mesh* square1 = object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
     AddMeshToList(square1);
 
@@ -63,6 +68,9 @@ void Lab3::Init()
 
     Mesh* square3 = object2D::CreateSquare("square3", corner, squareSide, glm::vec3(0, 0, 1));
     AddMeshToList(square3);
+
+    Mesh* square4 = object2D::CreateSquare("square4", corner, squareSide, glm::vec3(.015f, .517f, .811f), true);
+    AddMeshToList(square4);
 }
 
 
@@ -80,34 +88,105 @@ void Lab3::FrameStart()
 
 void Lab3::Update(float deltaTimeSeconds)
 {
-    // TODO(student): Update steps for translation, rotation and scale,
+    // Update steps for translation, rotation and scale,
     // in order to create animations. Use the class variables in the
     // class header, and if you need more of them to complete the task,
     // add them over there!
 
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(150, 250);
-    // TODO(student): Create animations by multiplying the current
+    glm::ivec2 resolution = window->GetResolution();
+
+    // Create animations by multiplying the current
     // transform matrix with the matrices you just implemented.
     // Remember, the last matrix in the chain will take effect first!
 
-    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(150, 100);    // set starting point
 
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(400, 250);
-    // TODO(student): Create animations by multiplying the current
+        if (moveRight) {
+            translateX += deltaTimeSeconds * MOVE_SPEED;
+            // translateY += deltaTimeSeconds * MOVE_SPEED;
+            modelMatrix *= transform2D::Translate(translateX, translateY);
+
+            if (translateX >= resolution.x * RES_LIMIT) {
+                moveRight = false;
+            }
+        }
+        else {
+            translateX -= deltaTimeSeconds * MOVE_SPEED;
+            modelMatrix *= transform2D::Translate(translateX, translateY);
+
+            if (translateX <= 0) {
+                moveRight = true;
+            }
+        }
+
+        RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    }
+
+    // Create animations by multiplying the current
+    // transform matrix with the matrices you just implemented4
+    // Remember, the last matrix in the chain will take effect first!
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(400, 250);    // set starting point
+
+        angularStep += deltaTimeSeconds;
+        modelMatrix *= transform2D::Translate(cx, cy);
+        modelMatrix *= transform2D::Rotate(angularStep);
+        modelMatrix *= transform2D::Translate(-cx, -cy);
+
+        RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
+    }
+
+    // Create animations by multiplying the current
     // transform matrix with the matrices you just implemented
     // Remember, the last matrix in the chain will take effect first!
+    {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(650, 250);
 
-    RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
+        scaleX += deltaTimeSeconds;
+        scaleY += deltaTimeSeconds;
 
-    modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(650, 250);
-    // TODO(student): Create animations by multiplying the current
-    // transform matrix with the matrices you just implemented
-    // Remember, the last matrix in the chain will take effect first!
+        modelMatrix *= transform2D::Translate(cx, cy);
+        modelMatrix *= transform2D::Scale(sin(scaleX), sin(scaleY));
+        modelMatrix *= transform2D::Translate(-cx, -cy);
 
-    RenderMesh2D(meshes["square3"], shaders["VertexColor"], modelMatrix);
+        RenderMesh2D(meshes["square3"], shaders["VertexColor"], modelMatrix);
+    }
+
+    // BONUS - bouncing square
+    {
+        float pointX = 600, pointY = 550;
+        angularStep += deltaTimeSeconds;
+        modelMatrix *= transform2D::Translate(pointX, pointY);
+        modelMatrix *= transform2D::Rotate(angularStep);
+        modelMatrix *= transform2D::Translate(-pointX, -pointY);
+
+
+        /*float pointX = 600, pointY = 500;
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(400, 500);
+
+        angularStep += deltaTimeSeconds;
+
+        modelMatrix *= transform2D::Translate(pointX + 400, 500);
+        modelMatrix *= transform2D::Rotate(angularStep);
+        modelMatrix *= transform2D::Translate(-(pointX - 400), -500);*/
+
+        /*angularStep += deltaTimeSeconds;
+        modelMatrix *= transform2D::Translate(cx + SQUARE_SIDE / 2, cy + SQUARE_SIDE / 2);
+        modelMatrix *= transform2D::Rotate(-angularStep);
+        modelMatrix *= transform2D::Translate(-(cx + SQUARE_SIDE / 2), -(cy + +SQUARE_SIDE / 2));*/
+
+        // translateX += deltaTimeSeconds * 0.1f;
+        // modelMatrix *= transform2D::Translate(translateX, translateY);
+
+
+
+        RenderMesh2D(meshes["square4"], shaders["VertexColor"], modelMatrix);
+    }
 }
 
 
@@ -129,7 +208,6 @@ void Lab3::OnInputUpdate(float deltaTime, int mods)
 
 void Lab3::OnKeyPress(int key, int mods)
 {
-    // Add key press event
 }
 
 

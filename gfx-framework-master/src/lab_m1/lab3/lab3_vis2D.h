@@ -2,6 +2,7 @@
 
 #include "components/simple_scene.h"
 
+#define MOVE_SPEED  1.5f
 
 namespace m1
 {
