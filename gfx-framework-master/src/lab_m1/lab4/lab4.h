@@ -2,11 +2,26 @@
 
 #include "components/simple_scene.h"
 
+#define MOVE_SPEED          2
+#define MINI_VIEWPORT_SPEED 150
+#define RATIO               200
 
 namespace m1
 {
     class Lab4 : public gfxc::SimpleScene
     {
+     public:
+         struct ViewportArea
+         {
+             ViewportArea() : x(0), y(0), width(1), height(1) {}
+             ViewportArea(float x, float y, float width, float height)
+                 : x(x), y(y), width(width), height(height) {}
+             float x;
+             float y;
+             float width;
+             float height;
+         };
+
      public:
         Lab4();
         ~Lab4();
@@ -27,11 +42,16 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
+        void RenderScene();
+
      protected:
         glm::mat4 modelMatrix;
         float translateX, translateY, translateZ;
         float scaleX, scaleY, scaleZ;
         float angularStepOX, angularStepOY, angularStepOZ;
         GLenum polygonMode;
+        ViewportArea miniViewportArea;
+        glm::vec3 sunPos;
+        float sunAngularStepOY;
     };
 }   // namespace m1

@@ -30,9 +30,13 @@ void Lab4::Init()
 {
     polygonMode = GL_FILL;
 
-    Mesh* mesh = new Mesh("box");
-    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "box.obj");
-    meshes[mesh->GetMeshID()] = mesh;
+    Mesh* mesh_box = new Mesh("box");
+    mesh_box->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "box.obj");
+    meshes[mesh_box->GetMeshID()] = mesh_box;
+
+    Mesh* mesh_sphere = new Mesh("sphere");
+    mesh_sphere->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
+    meshes[mesh_sphere->GetMeshID()] = mesh_sphere;
 
     // Initialize tx, ty and tz (the translation steps)
     translateX = 0;
@@ -48,6 +52,16 @@ void Lab4::Init()
     angularStepOX = 0;
     angularStepOY = 0;
     angularStepOZ = 0;
+
+    // Initialize Sun
+    sunPos.x = 400;
+    sunPos.y = 500;
+    sunPos.z = 0;
+    sunAngularStepOY = 0;
+
+    // Sets the resolution of the small viewport
+    glm::ivec2 resolution = window->GetResolution();
+    miniViewportArea = ViewportArea(950, 550, resolution.x / 5.f, resolution.y / 5.f);
 }
 
 
@@ -62,13 +76,7 @@ void Lab4::FrameStart()
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-
-void Lab4::Update(float deltaTimeSeconds)
-{
-    glLineWidth(3);
-    glPointSize(5);
-    glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
-
+void Lab4::RenderScene() {
     modelMatrix = glm::mat4(1);
     modelMatrix *= transform3D::Translate(-2.5f, 0.5f, -1.5f);
     modelMatrix *= transform3D::Translate(translateX, translateY, translateZ);
@@ -88,6 +96,40 @@ void Lab4::Update(float deltaTimeSeconds)
 }
 
 
+void Lab4::Update(float deltaTimeSeconds)
+{
+    glLineWidth(3);
+    glPointSize(5);
+
+    glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+    RenderScene();
+
+    // Sun
+    /*modelMatrix = glm::mat4(1);
+    modelMatrix *= transform3D::Translate(2, 2, 2);
+    modelMatrix *= transform3D::RotateOY(sunAngularStepOY);
+    RenderMesh2D(meshes["box"], shaders["VertexNormal"], modelMatrix);*/
+
+    // sunAngularStepOY += deltaTimeSeconds;
+    sunAngularStepOY += deltaTimeSeconds * 2;
+    modelMatrix = glm::mat4(1);
+    modelMatrix *= transform3D::Translate(2, 2, 0);
+    modelMatrix *= transform3D::RotateOY(sunAngularStepOY);
+    RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+
+
+    DrawCoordinateSystem();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
+
+    // rendering the scene again, in the new viewport
+    glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
+    RenderScene();
+    DrawCoordinateSystem();
+}
+
+
 void Lab4::FrameEnd()
 {
     DrawCoordinateSystem();
@@ -102,14 +144,90 @@ void Lab4::FrameEnd()
 
 void Lab4::OnInputUpdate(float deltaTime, int mods)
 {
-    // TODO(student): Add transformation logic
+    // Transformation logic
+    if (!window->MouseHold(GLFW_MOUSE_BUTTON_RIGHT)) {
+        if (window->KeyHold(GLFW_KEY_W)) {
+            translateZ -= deltaTime * MOVE_SPEED;
+        }
+        else if (window->KeyHold(GLFW_KEY_S)) {
+            translateZ += deltaTime * MOVE_SPEED;
+        }
+        else if (window->KeyHold(GLFW_KEY_A)) {
+            translateX -= deltaTime * MOVE_SPEED;
+        }
+        else if (window->KeyHold(GLFW_KEY_D)) {
+            translateX += deltaTime * MOVE_SPEED;
+        }
+        else if (window->KeyHold(GLFW_KEY_Q)) {
+            translateY -= deltaTime * MOVE_SPEED;
+        }
+        else if (window->KeyHold(GLFW_KEY_E)) {
+            translateY += deltaTime * MOVE_SPEED;
+        }
+    }
 
+    // Scaling logic
+    if (window->KeyHold(GLFW_KEY_1)) {
+        scaleX += deltaTime * MOVE_SPEED;
+        scaleY = scaleX;
+        scaleZ = scaleX;
+    }
+    else if (window->KeyHold(GLFW_KEY_2)) {
+        scaleX -= deltaTime * MOVE_SPEED;
+        scaleY = scaleX;
+        scaleZ = scaleX;
+    }
+    
+    // Rotation logic
+    if (window->KeyHold(GLFW_KEY_3)) {
+        angularStepOX -= deltaTime * MOVE_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_4)) {
+        angularStepOX += deltaTime * MOVE_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_5)) {
+        angularStepOY += deltaTime * MOVE_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_6)) {
+        angularStepOY -= deltaTime * MOVE_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_7)) {
+        angularStepOZ += deltaTime * MOVE_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_8)) {
+        angularStepOZ -= deltaTime * MOVE_SPEED;
+    }
+
+    // Mini viewport logic
+    if (window->KeyHold(GLFW_KEY_I)) {
+        miniViewportArea.y += deltaTime * MINI_VIEWPORT_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_K)) {
+        miniViewportArea.y -= deltaTime * MINI_VIEWPORT_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_J)) {
+        miniViewportArea.x -= deltaTime * MINI_VIEWPORT_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_L)) {
+        miniViewportArea.x += deltaTime * MINI_VIEWPORT_SPEED;
+    }
+    else if (window->KeyHold(GLFW_KEY_U)) {
+        miniViewportArea.width -= deltaTime * MINI_VIEWPORT_SPEED;
+        miniViewportArea.height -= deltaTime * MINI_VIEWPORT_SPEED;
+        miniViewportArea.x += deltaTime * MINI_VIEWPORT_SPEED / 2;
+        miniViewportArea.y += deltaTime * MINI_VIEWPORT_SPEED / 2;
+    }
+    else if (window->KeyHold(GLFW_KEY_O)) {
+       miniViewportArea.width += deltaTime * MINI_VIEWPORT_SPEED;
+       miniViewportArea.height += deltaTime * MINI_VIEWPORT_SPEED;
+       miniViewportArea.x -= deltaTime * MINI_VIEWPORT_SPEED / 2;
+       miniViewportArea.y -= deltaTime * MINI_VIEWPORT_SPEED / 2;
+    }
 }
 
 
 void Lab4::OnKeyPress(int key, int mods)
 {
-    // Add key press event
     if (key == GLFW_KEY_SPACE)
     {
         switch (polygonMode)
