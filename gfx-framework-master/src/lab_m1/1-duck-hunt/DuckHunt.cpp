@@ -52,12 +52,13 @@ void DuckHunt::CreateObjects()
 
 	glm::ivec2 resolution = window->GetResolution();
 
-	// DUCK - SQUARE
+	// DUCK - RECTANGLE
 	corner = glm::vec3(0);
-	length = TOTAL_DUCK_SIZE;
+	height = TOTAL_DUCK_HEIGHT;
+	length = TOTAL_DUCK_LENGTH;
 	color = glm::vec3(1, 1, 1);
 
-	Mesh* duck = Objects2D::CreateSquare("duck", corner, length, color, true);
+	Mesh* duck = Objects2D::CreateRectangle("duck", corner, height, length, color, true);
 	AddMeshToList(duck);
 
 	// DUCK - HEAD
@@ -239,12 +240,14 @@ void DuckHunt::RenderScore()
 
 void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix)
 {
-	/*eyesMatrix = glm::mat3(1);
-	headMatrix = glm::mat3(1);
-	beakMatrix = glm::mat3(1);
-	bodyMatrix = glm::mat3(1);
-	leftWingMatrix = glm::mat3(1);
-	rightWingMatrix = glm::mat3(1);*/
+	//eyesMatrix = glm::mat3(1);
+	//headMatrix = glm::mat3(1);
+	//beakMatrix = glm::mat3(1);
+	//bodyMatrix = glm::mat3(1);
+	//leftWingMatrix = glm::mat3(1);
+	//rightWingMatrix = glm::mat3(1);
+
+	//modelMatrixObj1 = glm::mat3(1);
 
 	// transform duck pos
 	eyesMatrix = duckPosMatrix;
@@ -253,6 +256,9 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, 
 	bodyMatrix = duckPosMatrix;
 	leftWingMatrix = duckPosMatrix;
 	rightWingMatrix = duckPosMatrix;
+
+	modelMatrixObj1 = duckPosMatrix;
+
 
 	// rotate wings
 	leftWingMatrix *= leftWingPosMatrix;
@@ -316,6 +322,8 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, 
 		rightWingMatrix *= transform2D::Translate(RIGHT_WING_LEFT_X, RIGHT_WING_LEFT_Y);
 	}
 
+	
+
 	// render the duck
 	RenderMesh2D(meshes["duck_eyes"], shaders["VertexColor"], eyesMatrix);
 	RenderMesh2D(meshes["duck_head"], shaders["VertexColor"], headMatrix);
@@ -323,6 +331,11 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, 
 	RenderMesh2D(meshes["left_duck_wing"], shaders["VertexColor"], leftWingMatrix);
 	RenderMesh2D(meshes["duck_body"], shaders["VertexColor"], bodyMatrix);
 	RenderMesh2D(meshes["right_duck_wing"], shaders["VertexColor"], rightWingMatrix);
+
+	RenderMesh2D(meshes["duck"], shaders["VertexColor"], modelMatrixObj1);
+
+	/*cout << "(" << translate.x << ", " << translate.y << ") ";
+	cout << "(" << translate.x + TOTAL_DUCK_LENGTH << ", " << translate.y + TOTAL_DUCK_HEIGHT << ")\n";*/
 }
 
 void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
@@ -330,7 +343,7 @@ void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
 	glm::ivec2 resolution = window->GetResolution();
 
 	// set starting point
-	modelMatrixMain = transform2D::Translate(resolution.x / 2 - 150 / 2, resolution.y / 4);
+	modelMatrixMain = transform2D::Translate(STARTING_POINT_X, STARTING_POINT_Y);
 
 	// dc e rezolutia relativa la starting modelMatrix??
 
@@ -402,13 +415,11 @@ void DuckHunt::ComputeWingsPosition(float deltaTimeSeconds)
 		direction = LEFT_DIRECTION;
 	}
 
-	leftWingPosMatrix = glm::mat3(1);
-	leftWingPosMatrix *= transform2D::Translate(leftWingPosX, leftWingPosY);
+	leftWingPosMatrix = transform2D::Translate(leftWingPosX, leftWingPosY);
 	leftWingPosMatrix *= transform2D::Rotate(angularStep * direction);
 	leftWingPosMatrix *= transform2D::Translate(-leftWingPosX, -leftWingPosY);
 
-	rightWingPosMatrix = glm::mat3(1);
-	rightWingPosMatrix *= transform2D::Translate(rightWingPosX, rightWingPosY);
+	rightWingPosMatrix = transform2D::Translate(rightWingPosX, rightWingPosY);
 	rightWingPosMatrix *= transform2D::Rotate(-angularStep * direction);
 	rightWingPosMatrix *= transform2D::Translate(-rightWingPosX, -rightWingPosY);
 }
@@ -421,16 +432,16 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	RenderBullets();
 	RenderScore();
 
-	RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
-	RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
-
+	/*translate.x = 0;
+	translate.y = 0;*/
 
 	ComputeDuckPosition(deltaTimeSeconds);
 	ComputeWingsPosition(deltaTimeSeconds);
 	RenderDuck(modelMatrixMain, leftWingPosMatrix, rightWingPosMatrix);
-	
+	//RenderDuck(glm::mat3(1), leftWingPosMatrix, rightWingPosMatrix);
 
-	//RenderMesh2D(meshes["duck"], shaders["VertexColor"], glm::mat3(1));
+	RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
+	RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
 
 	RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
 }
@@ -460,7 +471,24 @@ void DuckHunt::OnKeyRelease(int key, int mods)
 
 void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
-	// Add mouse move event
+	glm::ivec2 resolution = window->GetResolution();
+
+	currPosX = mouseX + deltaX;
+	currPosY = mouseY + deltaY;
+
+	leftDownCornerX = translate.x + STARTING_POINT_X;
+	leftDownCornerY = resolution.y - STARTING_POINT_Y - translate.y;
+	rightUpCornerX = translate.x + STARTING_POINT_X + TOTAL_DUCK_LENGTH;
+	rightUpCornerY = resolution.y - STARTING_POINT_Y - (translate.y + TOTAL_DUCK_HEIGHT);
+
+	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
+		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
+		cout << "mouse is over duck\n";
+	}
+
+	/*cout << currPosX << " " << currPosY << "\n";
+	cout << "$$$" << leftDownCornerX << " " << rightUpCornerX << "$$$\n";
+	cout << "***" << leftDownCornerY << " " << rightUpCornerY << "***\n";*/
 }
 
 

@@ -11,16 +11,20 @@
 #define MOVE_SPEED				.7f
 #define MOVE_SPEED_WINGS		(MOVE_SPEED * 2)
 
+#define STARTING_POINT_X		(resolution.x / 2 - 150 / 2)
+#define STARTING_POINT_Y		(resolution.y / 4)
+
 #define SMALL_OBJ_DIM			13
 #define SMALL_OBJ_DIM2			(SMALL_OBJ_DIM * 2)
 
-#define TOTAL_DUCK_SIZE			150
 #define BODY_SIZE				80
 #define HEAD_SIZE				24
 #define EYES_SIZE				4
 #define BEAK_SIZE				16
 #define L_WING_SIZE				36
-#define R_WING_SIZE				32  
+#define R_WING_SIZE				32
+#define TOTAL_DUCK_LENGTH		150
+#define TOTAL_DUCK_HEIGHT		(BODY_SIZE * M_SQRT2 / 2 + HEAD_SIZE)
 
 #define EYES_RIGHT_X			(BODY_SIZE * M_SQRT2 + 8)
 #define EYES_RIGHT_Y			(BODY_SIZE * M_SQRT2 / 2 + 6)
@@ -100,5 +104,7 @@ namespace m1
 		 float angularStep;
 		 float leftWingPosX, leftWingPosY;
 		 float rightWingPosX, rightWingPosY;
+		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
+		 int currPosX, currPosY;
 	};
 }	// namespace m1
