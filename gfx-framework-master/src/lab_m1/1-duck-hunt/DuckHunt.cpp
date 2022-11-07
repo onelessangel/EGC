@@ -187,10 +187,12 @@ void DuckHunt::RenderLives()
 	modelMatrixMain = transform2D::Translate(1090, 680);
 	modelMatrixMain *= transform2D::Scale(SMALL_OBJ_DIM, SMALL_OBJ_DIM);
 
+	// init pos
 	modelMatrixObj1 = glm::mat3(1);
 	modelMatrixObj2 = transform2D::Translate(SMALL_OBJ_DIM2 + SMALL_OBJ_DIM, 0);
 	modelMatrixObj3 = transform2D::Translate(2 * (SMALL_OBJ_DIM2 + SMALL_OBJ_DIM), 0);
 
+	// screen pos
 	modelMatrixObj1 *= modelMatrixMain;
 	modelMatrixObj2 *= modelMatrixMain;
 	modelMatrixObj3 *= modelMatrixMain;
@@ -235,66 +237,14 @@ void DuckHunt::RenderScore()
 	RenderMesh2D(meshes["score_unit"], shaders["VertexColor"], modelMatrixObj2);
 }
 
-void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix, float deltaTimeSeconds)
+void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix)
 {
-	// wingsPosMatrix
-
-	//leftWingMatrix = leftWingPosMatrix;
-
 	/*eyesMatrix = glm::mat3(1);
 	headMatrix = glm::mat3(1);
 	beakMatrix = glm::mat3(1);
 	bodyMatrix = glm::mat3(1);
 	leftWingMatrix = glm::mat3(1);
 	rightWingMatrix = glm::mat3(1);*/
-
-	//leftWingMatrix = leftWingPosMatrix;
-	
-
-	//if (angularStep <= MAX_ANGLE) {
-	//	angularStep += deltaTimeSeconds;
-	//}
-	//else {
-	//	angularStep = 0;
-	//}
-
-	if (angularStep > MAX_ANGLE) {
-		movingInward = false;
-	}
-	else if (angularStep < 0) {
-		movingInward = true;
-	}
-
-	if (movingInward) {
-		angularStep += deltaTimeSeconds * MOVE_SPEED_WINGS;
-	}
-	else {
-		angularStep -= deltaTimeSeconds * MOVE_SPEED_WINGS;
-	}
-
-	float leftWingPosX, leftWingPosY;
-	float rightWingPosX, rightWingPosY;
-	
-	if (moveRight) {
-		leftWingPosX = LEFT_WING_RIGHT_X + L_WING_SIZE;
-		leftWingPosY = LEFT_WING_RIGHT_Y;
-
-		rightWingPosX = RIGHT_WING_RIGHT_X;
-		rightWingPosY = RIGHT_WING_RIGHT_Y + R_WING_SIZE;
-
-		direction = RIGHT_DIRECTION;
-	}
-	else {
-		leftWingPosX = LEFT_WING_LEFT_X - L_WING_SIZE;
-		leftWingPosY = LEFT_WING_LEFT_Y;
-
-		rightWingPosX = RIGHT_WING_LEFT_X;
-		rightWingPosY = RIGHT_WING_RIGHT_Y + R_WING_SIZE;
-
-		direction = LEFT_DIRECTION;
-	}	
-	
-	//rightWingMatrix = rightWingPosMatrix;
 
 	// transform duck pos
 	eyesMatrix = duckPosMatrix;
@@ -304,16 +254,9 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, 
 	leftWingMatrix = duckPosMatrix;
 	rightWingMatrix = duckPosMatrix;
 
-	leftWingMatrix *= transform2D::Translate(leftWingPosX, leftWingPosY);
-	leftWingMatrix *= transform2D::Rotate(angularStep * direction);
-	leftWingMatrix *= transform2D::Translate(-leftWingPosX, -leftWingPosY);
-
-	rightWingMatrix *= transform2D::Translate(rightWingPosX, rightWingPosY);
-	rightWingMatrix *= transform2D::Rotate(-angularStep * direction);
-	rightWingMatrix *= transform2D::Translate(-rightWingPosX, -rightWingPosY);
-
-	//leftWingMatrix *= leftWingPosMatrix;
-	//rightWingMatrix *= rightWingPosMatrix;
+	// rotate wings
+	leftWingMatrix *= leftWingPosMatrix;
+	rightWingMatrix *= rightWingPosMatrix;
 
 	// reassemble the duck
 
@@ -373,23 +316,18 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, 
 		rightWingMatrix *= transform2D::Translate(RIGHT_WING_LEFT_X, RIGHT_WING_LEFT_Y);
 	}
 
-	/*leftWingMatrix *= leftWingPosMatrix;
-	rightWingMatrix *= rightWingPosMatrix;*/
-
 	// render the duck
-	RenderMesh2D(meshes["left_duck_wing"], shaders["VertexColor"], leftWingMatrix);
 	RenderMesh2D(meshes["duck_eyes"], shaders["VertexColor"], eyesMatrix);
 	RenderMesh2D(meshes["duck_head"], shaders["VertexColor"], headMatrix);
 	RenderMesh2D(meshes["duck_beak"], shaders["VertexColor"], beakMatrix);
+	RenderMesh2D(meshes["left_duck_wing"], shaders["VertexColor"], leftWingMatrix);
 	RenderMesh2D(meshes["duck_body"], shaders["VertexColor"], bodyMatrix);
-	//RenderMesh2D(meshes["left_duck_wing"], shaders["VertexColor"], leftWingMatrix);
 	RenderMesh2D(meshes["right_duck_wing"], shaders["VertexColor"], rightWingMatrix);
 }
 
-glm::mat3 DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
+void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
 {
 	glm::ivec2 resolution = window->GetResolution();
-	/*float rotateAngle = 0;*/
 
 	// set starting point
 	modelMatrixMain = transform2D::Translate(resolution.x / 2 - 150 / 2, resolution.y / 4);
@@ -426,56 +364,54 @@ glm::mat3 DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
 		}
 	}
 
-	/*if (moveRight && moveUp) {
-		rotateAngle = M_PI_4;
-	}
-	else if (moveRight && !moveUp) {
-		rotateAngle = -M_PI_4;
-	}
-	else {
-		rotateAngle = 0;
-	}*/
-	
 	modelMatrixMain *= transform2D::Translate(translate.x, translate.y);
-	//modelMatrixMain *= transform2D::Rotate(rotateAngle);
-
-	return modelMatrixMain;
 }
 
-//void DuckHunt::ComputeWingsPosition(float deltaTimeSeconds)
-//{
-//	glm::ivec2 resolution = window->GetResolution();
-//	float xPos = resolution.x / 2 - 150 / 2;
-//	float yPos = resolution.y / 4;
-//	float xPosLeft, xPosRight;
-//	float yPosLeft, yPosRight;
-//	//float yPos = */
-//
-//	leftWingPosMatrix = glm::mat3(1);
-//	rightWingPosMatrix = glm::mat3(1);
-//
-//	//leftWingPosMatrix = transform2D::Translate(xPos + translate.x, yPos + translate.y);    // set starting point
-//	//rightWingPosMatrix = transform2D::Translate(xPos + translate.x, yPos + translate.y);   // set starting point
-//
-//	//if (angularStep <)
-//	angularStep += deltaTimeSeconds;
-//
-//	xPosLeft = xPos + translate.x;
-//	yPosLeft = yPos + translate.y;
-//
-//	/*xPosRight = xPos + translate.x;
-//	yPosRight = yPos + translate.y;*/
-//
-//	leftWingPosMatrix *= transform2D::Translate(xPosLeft, yPosLeft);		// coordonate punct de rotatie
-//	leftWingPosMatrix *= transform2D::Rotate(angularStep);					// unghi
-//	leftWingPosMatrix *= transform2D::Translate(-xPosLeft, -yPosLeft);		// aducere in origine a pubnctului de rotatie
-//
-//	//rightWingPosMatrix *= transform2D::Translate(xPosRight, yPosRight);		// coordonate punct de rotatie
-//	//rightWingPosMatrix *= transform2D::Rotate(angularStep);					// unghi
-//	//rightWingPosMatrix *= transform2D::Translate(-xPosRight, -yPosRight);	// aducere in origine a punctului de rotatie
-//
-//	//return glm::vec2(leftWingPosMatrix, rightWingPosMatrix);
-//}
+void DuckHunt::ComputeWingsPosition(float deltaTimeSeconds)
+{
+	if (angularStep > MAX_ANGLE) {
+		movingInward = false;
+	}
+	else if (angularStep < 0) {
+		movingInward = true;
+	}
+
+	if (movingInward) {
+		angularStep += deltaTimeSeconds * MOVE_SPEED_WINGS;
+	}
+	else {
+		angularStep -= deltaTimeSeconds * MOVE_SPEED_WINGS;
+	}
+
+	if (moveRight) {
+		leftWingPosX = LEFT_WING_RIGHT_X + L_WING_SIZE;
+		leftWingPosY = LEFT_WING_RIGHT_Y;
+
+		rightWingPosX = RIGHT_WING_RIGHT_X;
+		rightWingPosY = RIGHT_WING_RIGHT_Y + R_WING_SIZE;
+
+		direction = RIGHT_DIRECTION;
+	}
+	else {
+		leftWingPosX = LEFT_WING_LEFT_X - L_WING_SIZE;
+		leftWingPosY = LEFT_WING_LEFT_Y;
+
+		rightWingPosX = RIGHT_WING_LEFT_X;
+		rightWingPosY = RIGHT_WING_RIGHT_Y + R_WING_SIZE;
+
+		direction = LEFT_DIRECTION;
+	}
+
+	leftWingPosMatrix = glm::mat3(1);
+	leftWingPosMatrix *= transform2D::Translate(leftWingPosX, leftWingPosY);
+	leftWingPosMatrix *= transform2D::Rotate(angularStep * direction);
+	leftWingPosMatrix *= transform2D::Translate(-leftWingPosX, -leftWingPosY);
+
+	rightWingPosMatrix = glm::mat3(1);
+	rightWingPosMatrix *= transform2D::Translate(rightWingPosX, rightWingPosY);
+	rightWingPosMatrix *= transform2D::Rotate(-angularStep * direction);
+	rightWingPosMatrix *= transform2D::Translate(-rightWingPosX, -rightWingPosY);
+}
 
 void DuckHunt::Update(float deltaTimeSeconds)
 {
@@ -485,16 +421,15 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	RenderBullets();
 	RenderScore();
 
-	modelMatrixMain = ComputeDuckPosition(deltaTimeSeconds);
-	//ComputeWingsPosition(deltaTimeSeconds);
-	RenderDuck(modelMatrixMain, leftWingPosMatrix, rightWingPosMatrix, deltaTimeSeconds);
-	//RenderDuck(glm::mat3(1), leftWingPosMatrix, rightWingPosMatrix, deltaTimeSeconds);
-
-
 	RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
 	RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
 
+
+	ComputeDuckPosition(deltaTimeSeconds);
+	ComputeWingsPosition(deltaTimeSeconds);
+	RenderDuck(modelMatrixMain, leftWingPosMatrix, rightWingPosMatrix);
 	
+
 	//RenderMesh2D(meshes["duck"], shaders["VertexColor"], glm::mat3(1));
 
 	RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));

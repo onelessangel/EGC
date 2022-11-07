@@ -84,8 +84,8 @@ namespace m1
 		 void RenderLives();
 		 void RenderBullets();
 		 void RenderScore();
-		 void RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix, float deltaTimeSeconds);
-		 glm::mat3 ComputeDuckPosition(float deltaTimeSeconds);
+		 void RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix);
+		 void ComputeDuckPosition(float deltaTimeSeconds);
 		 void ComputeWingsPosition(float deltaTimeSeconds);
 
 	 protected:
@@ -98,5 +98,7 @@ namespace m1
 		 bool duckState;
 		 int direction, duckCounter;
 		 float angularStep;
+		 float leftWingPosX, leftWingPosY;
+		 float rightWingPosX, rightWingPosY;
 	};
 }	// namespace m1
