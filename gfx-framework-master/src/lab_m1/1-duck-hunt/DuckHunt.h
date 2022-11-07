@@ -8,7 +8,8 @@
 #define RATIO_Y					.15f
 #define RES_LIMIT_X				.444f	// ???????????
 #define RES_LIMIT_Y				.625f
-#define MOVE_SPEED				.1f
+#define MOVE_SPEED				.7f
+#define MOVE_SPEED_WINGS		(MOVE_SPEED * 2)
 
 #define SMALL_OBJ_DIM			13
 #define SMALL_OBJ_DIM2			(SMALL_OBJ_DIM * 2)
@@ -51,7 +52,9 @@
 #define RIGHT_WING_LEFT_X		(BODY_SIZE * M_SQRT2 / 2)
 #define RIGHT_WING_LEFT_Y		RIGHT_WING_RIGHT_Y	
 
-#define MAX_ANGLE				1.3f
+#define MAX_ANGLE				1.25f
+#define RIGHT_DIRECTION			1
+#define LEFT_DIRECTION			(-1)
 
 namespace m1
 {
@@ -93,7 +96,7 @@ namespace m1
 		 glm::vec2 translate;
 		 bool moveRight, moveUp, movingInward;
 		 bool duckState;
-		 int duckCounter;
+		 int direction, duckCounter;
 		 float angularStep;
 	};
 }	// namespace m1
