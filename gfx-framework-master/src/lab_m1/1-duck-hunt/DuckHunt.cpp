@@ -42,6 +42,8 @@ void DuckHunt::Init()
 
 	direction = 1;
 
+	duckHover = false;
+
 	CreateObjects();
 }
 
@@ -484,6 +486,10 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
 		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
 		cout << "mouse is over duck\n";
+		duckHover = true;
+	}
+	else {
+		duckHover = false;
 	}
 
 	/*cout << currPosX << " " << currPosY << "\n";
@@ -495,6 +501,10 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
 	// Add mouse button press event
+	if (window->MouseHold(GLFW_MOUSE_BUTTON_LEFT) && duckHover) {
+		duckState = SHOT;
+		cout << "I've been shot\n";
+	}
 }
 
 

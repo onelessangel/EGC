@@ -100,11 +100,12 @@ namespace m1
 		 glm::vec2 translate;
 		 bool moveRight, moveUp, movingInward;
 		 bool duckState;
+		 bool duckHover;
+		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
+		 int currPosX, currPosY;
 		 int direction, duckCounter;
 		 float angularStep;
 		 float leftWingPosX, leftWingPosY;
 		 float rightWingPosX, rightWingPosY;
-		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
-		 int currPosX, currPosY;
 	};
 }	// namespace m1
