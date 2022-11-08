@@ -3,6 +3,8 @@
 #include "components/simple_scene.h"
 #include "lab_m1/lab5/lab_camera.h"
 
+#define Z_FAR		(200.f)
+#define Z_NEAR		(.01f)
 
 namespace m1
 {
@@ -36,6 +38,8 @@ namespace m1
         bool renderCameraTarget;
 
         // TODO(student): If you need any other class variables, define them here.
+        bool projectionType;
+        GLfloat fov, width;
 
     };
 }   // namespace m1
