@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "components/simple_scene.h"
+#include "components/text_renderer.h"
 
 #define RATIO_X					.25f
 #define RATIO_Y					.15f
@@ -101,6 +102,7 @@ namespace m1
 
 	 protected:
 		 enum DuckState { ACTIVE, SHOT, ESCAPING, GONE};
+		 gfxc::TextRenderer *tr;
 		 glm::mat3 modelMatrixMain, modelMatrixObj1, modelMatrixObj2, modelMatrixObj3;
 		 glm::mat3 leftWingPosMatrix = glm::mat3(1), rightWingPosMatrix = glm::mat3(1);
 		 glm::mat3 bodyMatrix, headMatrix, beakMatrix, leftWingMatrix, rightWingMatrix, eyesMatrix;

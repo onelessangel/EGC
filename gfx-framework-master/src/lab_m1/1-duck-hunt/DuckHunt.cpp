@@ -2,8 +2,11 @@
 #include "lab_m1/1-duck-hunt/Objects2D.h"
 #include "Transform2D.h"
 
+using namespace gfxc;
 using namespace std;
 using namespace m1;
+
+//TextRenderer* tr;
 
 DuckHunt::DuckHunt()
 {
@@ -26,6 +29,9 @@ void DuckHunt::Init()
 	camera->SetRotation(glm::vec3(0, 0, 0));
 	camera->Update();
 	GetCameraInput()->SetActive(false);
+
+	tr = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	tr->Load(window->props.selfDir + "\\assets\\fonts\\Hack-Bold.ttf", 128);
 
 	duckCount = 0;
 	lifeCount = 3;
@@ -140,13 +146,14 @@ void DuckHunt::CreateObjects()
 	corner = glm::vec3(0, resolution.y / 4, 0);
 	height = (float) resolution.y / 4;
 	length = (float) resolution.x;
-	color = glm::vec3(0.047, 0.714, 0.012);
+	//color = glm::vec3(0.047, 0.714, 0.012);
+	color = glm::vec3(1, 0, 0);
 
-	Mesh* grass = Objects2D::CreateRectangle("grass", corner, height, length, color, true);
+	Mesh* grass = Objects2D::CreateRectangle("grass", corner, height, length, color, false);
 	AddMeshToList(grass);
 
-	Mesh* mesh = new Mesh("grass_img");
-	mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_grass"), "grass.fbx");
+	Mesh* mesh = new Mesh("pixelated_grass");
+	mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_grass"), "pixelated_grass.fbx");
 	meshes[mesh->GetMeshID()] = mesh;
 
 	// SKY
@@ -539,6 +546,12 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	cout << duckSpeed << "\n";
 	cout << duckCount << "\n";
 
+	// render background function - macros pentru positions si scale
+	RenderMesh(meshes["sky"], shaders["VertexColor"], glm::vec3(0, 0, -200), glm::vec3(1, 1, 1));
+	RenderMesh(meshes["pixelated_grass"], glm::vec3(650, 270, 0), glm::vec3(200, 180, 0));
+	RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
+	RenderMesh(meshes["ground"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
+
 	if (totalTime >= TIME_LIMIT && duckState == ACTIVE) {
 		duckState = ESCAPING;
 	}
@@ -571,16 +584,21 @@ void DuckHunt::Update(float deltaTimeSeconds)
 
 	ComputeDuckPosition(deltaTimeSeconds);
 	ComputeWingsPosition(deltaTimeSeconds);
-	//RenderDuck(glm::mat3(1), leftWingPosMatrix, rightWingPosMatrix);
 	RenderDuck(modelMatrixMain);
 
-	RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
-	RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
+	//RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
+	//RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
 
-	//RenderMesh(meshes["grass_img"], glm::vec3(500, 100, 0), glm::vec3(-300, -300, 0));
+	//tr->RenderText("TEST", 50, 50, 1, glm::vec3(0, 0, 1));
 
+	tr->RenderText("TEXT", 50, 50, 1.0f, glm::vec3(0, 0, 1));
 
-	RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
+	//RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
+	
+
+	//tr->RenderText("TEST", 50, 50, .5f, glm::vec3(0, 0, 1));
+
+	//tr->RenderText("TEST", 50, 50, .5f, glm::vec3(0, 0, 1));
 }
 
 void DuckHunt::FrameEnd()

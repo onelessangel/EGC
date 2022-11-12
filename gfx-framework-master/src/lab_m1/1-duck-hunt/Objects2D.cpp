@@ -41,7 +41,18 @@ Mesh* Objects2D::CreateRectangle(
     glm::vec3 color,
     bool fill)
 {
+    //const std::string& texturePath
     glm::vec3 corner = leftBottomCorner;
+
+   /* VertexFormat v0 = VertexFormat(corner, color, glm::vec3(0.f, 1.f, 1.f), glm::vec2(0.f, 0.f));
+    VertexFormat v1 = VertexFormat(corner + glm::vec3(length, 0, -10), color, glm::vec3(1.f, 0.f, 1.f), glm::vec2(1.f, 0.f));
+    VertexFormat v2 = VertexFormat(corner + glm::vec3(length, height, 10), color, glm::vec3(1.f, 0.f, 0.f), glm::vec2(1.f, 1.f));
+    VertexFormat v3 = VertexFormat(corner + glm::vec3(0, height, -10), color, glm::vec3(0.f, 1.f, 0.f), glm::vec2(0.f, 1.f));*/
+
+    /*std::vector<glm::vec3> vertices =
+    {
+        v0.position, v1.position, v2.position, v3.position
+    };*/
 
     std::vector<VertexFormat> vertices =
     {
@@ -50,6 +61,18 @@ Mesh* Objects2D::CreateRectangle(
         VertexFormat(corner + glm::vec3(length, height, 0), color),
         VertexFormat(corner + glm::vec3(0, height, 0), color)
     };
+
+    ///* Normals for the object */
+    //std::vector<glm::vec3> normals
+    //{
+    //    v0.normal, v1.normal, v2.normal, v3.normal
+    //};
+
+    ///* Texture coordinates for the object */
+    //std::vector<glm::vec2> textureCoords
+    //{
+    //    v0.text_coord, v1.text_coord, v2.text_coord, v3.text_coord
+    //};
 
     Mesh* rectangle = new Mesh(name);
     std::vector<unsigned int> indices = { 0, 1, 2, 3 };
@@ -64,6 +87,11 @@ Mesh* Objects2D::CreateRectangle(
     }
 
     rectangle->InitFromData(vertices, indices);
+    //rectangle->InitFromData(vertices, normals, textureCoords, indices);
+
+    //auto texture = new Texture2D();
+    //texture->Load2D(texturePath.c_str(), GL_REPEAT);
+
     return rectangle;
 }
 
