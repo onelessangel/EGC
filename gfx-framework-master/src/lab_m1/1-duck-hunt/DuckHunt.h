@@ -6,16 +6,20 @@
 
 #define RATIO_X					.25f
 #define RATIO_Y					.15f
-#define RES_LIMIT_X				.444f	// ???????????
+#define RES_LIMIT_X				.444f
 #define RES_LIMIT_Y				.625f
-#define MOVE_SPEED				.7f
-#define MOVE_SPEED_WINGS		(MOVE_SPEED * 2)
+#define MOVE_SPEED				.8f
+//#define MOVE_SPEED_WINGS		(MOVE_SPEED * 2)
+
+#define TIME_LIMIT				20
 
 #define STARTING_POINT_X		(resolution.x / 2 - 150 / 2)
 #define STARTING_POINT_Y		(resolution.y / 4)
 
 #define SMALL_OBJ_DIM			13
 #define SMALL_OBJ_DIM2			(SMALL_OBJ_DIM * 2)
+#define SCORE_BOX_LENGTH		200
+#define SCORE_UNIT_LENGTH		10
 
 #define BODY_SIZE				80
 #define HEAD_SIZE				24
@@ -84,28 +88,35 @@ namespace m1
 		 void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		 void OnWindowResize(int width, int height) override;
 
+		 void InitNewLevelParams();
 		 void CreateObjects();
 		 void RenderLives();
 		 void RenderBullets();
 		 void RenderScore();
-		 void RenderDuck(glm::mat3 duckPosMatrix, glm::mat3 leftWingPosMatrix, glm::mat3 rightWingPosMatrix);
+		 void RenderDuck(glm::mat3 duckPosMatrix);
 		 void ComputeDuckPosition(float deltaTimeSeconds);
+		 void ComputeDuckRotation();
 		 void ComputeWingsPosition(float deltaTimeSeconds);
+		 void ComputeDuckState();
 
 	 protected:
-		 enum DuckState { ACTIVE, SHOT, ESCAPED};
+		 enum DuckState { ACTIVE, SHOT, ESCAPING, GONE};
 		 glm::mat3 modelMatrixMain, modelMatrixObj1, modelMatrixObj2, modelMatrixObj3;
 		 glm::mat3 leftWingPosMatrix = glm::mat3(1), rightWingPosMatrix = glm::mat3(1);
 		 glm::mat3 bodyMatrix, headMatrix, beakMatrix, leftWingMatrix, rightWingMatrix, eyesMatrix;
 		 glm::vec2 translate;
 		 bool moveRight, moveUp, movingInward;
-		 bool duckState;
-		 bool duckHover;
+		 bool duckHover, hasEscaped;
 		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
 		 int currPosX, currPosY;
-		 int direction, duckCounter;
+		 int direction;
+		 int duckCount, bulletCount, lifeCount, scoreCount;
+		 int level;
+		 DuckState duckState;
 		 float angularStep;
 		 float leftWingPosX, leftWingPosY;
 		 float rightWingPosX, rightWingPosY;
+		 float totalTime;
+		 float duckSpeed, wingsSpeed;
 	};
 }	// namespace m1
