@@ -28,15 +28,21 @@ void DuckHunt::Init()
 	camera->Update();
 	GetCameraInput()->SetActive(false);
 
-	levelTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
-	levelTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", BIG_FONT_SIZE);
+	bigTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	bigTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", BIG_FONT_SIZE);
 
-	scoreTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
-	scoreTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", SMALL_FONT_SIZE);
+	smallTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	smallTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", SMALL_FONT_SIZE);
 
-	finalScoreTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
-	finalScoreTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", MEDIUM_FONT_SIZE);
+	mediumTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	mediumTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", MEDIUM_FONT_SIZE);
 
+	NewGameInit();
+	CreateObjects();
+}
+
+void DuckHunt::NewGameInit()
+{
 	duckCount = 0;
 	lifeCount = 3;
 	scoreCount = 0;
@@ -46,9 +52,10 @@ void DuckHunt::Init()
 	levelTime = 0;
 
 	freezeGame = false;
+	restartHover = false;
+	exitHover = false;
 
 	InitNewLevelParams();
-	CreateObjects();
 }
 
 void DuckHunt::InitNewLevelParams()
@@ -299,7 +306,7 @@ void DuckHunt::RenderScore()
 	}
 
 	if (showAddedPoints) {
-		scoreTR->RenderText("+ 10 POINTS", 1097, 110, 1, glm::vec3(0, 0, 1));
+		smallTR->RenderText("+ 10 POINTS", 1097, 110, 1, glm::vec3(0, 0, 1));
 	}
 }
 
@@ -601,7 +608,7 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	}
 
 	if (showLevel) {
-		levelTR->RenderText("LEVEL " + to_string(level), resolution.x / 2 - 150, resolution.y / 2 - 100, 1, glm::vec3(0, 0, 1));
+		bigTR->RenderText("LEVEL " + to_string(level), resolution.x / 2 - 150, resolution.y / 2 - 100, 1, glm::vec3(0, 0, 1));
 	}
 
 	hasEscaped = false;
@@ -627,10 +634,10 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	}
 
 	if (duckCount == MAX_SCORE || lifeCount == 0) {
-		levelTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 200, 1, glm::vec3(0, 0, 1));
-
-		// change color??
-		finalScoreTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 100, 1, glm::vec3(0, 0, 0));
+		bigTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 250, 1, glm::vec3(0, 0, 1));
+		mediumTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 150, 1, glm::vec3(0, 0, .502));
+		mediumTR->RenderText("TRY AGAIN", resolution.x / 2 - 150, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+		mediumTR->RenderText("EXIT", resolution.x / 2 + 125, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
 
 		bulletCount = 3;
 		freezeGame = true;
@@ -681,36 +688,51 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 	currPosX = mouseX + deltaX;
 	currPosY = mouseY + deltaY;
 
-	if (duckState == ACTIVE) {
-		leftDownCornerX = translate.x + STARTING_POINT_X;
-		leftDownCornerY = resolution.y - STARTING_POINT_Y - translate.y;
-		rightUpCornerX = translate.x + STARTING_POINT_X + TOTAL_DUCK_LENGTH;
-		rightUpCornerY = resolution.y - STARTING_POINT_Y - (translate.y + TOTAL_DUCK_HEIGHT);
-	
-		if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
-			currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
-			duckHover = true;
-			//cout << "mouse is over duck\n";
+	if (!freezeGame) {
+		if (duckState == ACTIVE) {
+			leftDownCornerX = translate.x + STARTING_POINT_X;
+			leftDownCornerY = resolution.y - STARTING_POINT_Y - translate.y;
+			rightUpCornerX = translate.x + STARTING_POINT_X + TOTAL_DUCK_LENGTH;
+			rightUpCornerY = resolution.y - STARTING_POINT_Y - (translate.y + TOTAL_DUCK_HEIGHT);
+
+			if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
+				currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
+				duckHover = true;
+				//cout << "mouse is over duck\n";
+			}
 		}
+
+
+		if (duckState == ESCAPING) {
+			leftDownCornerX = translate.x + STARTING_POINT_X + TOTAL_DUCK_HEIGHT;
+			leftDownCornerY = resolution.y - (translate.y + STARTING_POINT_Y);
+			rightUpCornerX = translate.x + STARTING_POINT_X - TOTAL_DUCK_HEIGHT;
+			rightUpCornerY = resolution.y - STARTING_POINT_Y - (translate.y + TOTAL_DUCK_LENGTH);
+
+			if (currPosX >= rightUpCornerX && currPosX <= leftDownCornerX &&
+				currPosY <= leftDownCornerY && currPosX >= rightUpCornerY) {
+				duckHover = true;
+				//cout << "mouse is over duck\n";
+			}
+		}
+
+		return;
 	}
 
+	leftDownCornerX = 620;
+	leftDownCornerY = 304;
+	rightUpCornerX = 665;
+	rightUpCornerY = 270;
 
-	if (duckState == ESCAPING) {
-		leftDownCornerX = translate.x + STARTING_POINT_X + TOTAL_DUCK_HEIGHT;
-		leftDownCornerY = resolution.y - (translate.y + STARTING_POINT_Y);
-		rightUpCornerX = translate.x + STARTING_POINT_X - TOTAL_DUCK_HEIGHT;
-		rightUpCornerY = resolution.y - STARTING_POINT_Y - (translate.y + TOTAL_DUCK_LENGTH);
-	
-		if (currPosX >= rightUpCornerX && currPosX <= leftDownCornerX &&
-			currPosY <= leftDownCornerY && currPosX >= rightUpCornerY) {
-			duckHover = true;
-			//cout << "mouse is over duck\n";
-		}
+	cout << currPosX << " " << currPosY << "\n";
+
+	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
+		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
+		restartHover = true;
+		cout << "mouse is over button\n";
 	}
-
-	/*cout << currPosX << " " << currPosY << "\n";
-	cout << "$$$" << leftDownCornerX << " " << rightUpCornerX << "$$$\n";
-	cout << "***" << leftDownCornerY << " " << rightUpCornerY << "***\n";*/
+	//cout << "$$$" << leftDownCornerX << " " << rightUpCornerX << "$$$\n";
+	//cout << "***" << leftDownCornerY << " " << rightUpCornerY << "***\n";
 }
 
 
@@ -718,6 +740,12 @@ void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
 	// Add mouse button press event
 	if (window->MouseHold(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (freezeGame) {
+			if (restartHover) {
+				NewGameInit();
+			}
+		}
+
 		if (duckHover && duckState != SHOT && bulletCount > 0) {
 			duckState = SHOT;
 			cout << "I've been shot\n";

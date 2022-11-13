@@ -95,6 +95,7 @@ namespace m1
 		 void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		 void OnWindowResize(int width, int height) override;
 
+		 void NewGameInit();
 		 void InitNewLevelParams();
 		 void CreateObjects();
 		 void RenderLives();
@@ -108,13 +109,13 @@ namespace m1
 
 	 protected:
 		 enum DuckState { ACTIVE, SHOT, ESCAPING, GONE};
-		 gfxc::TextRenderer *levelTR, *scoreTR, *finalScoreTR;
+		 gfxc::TextRenderer *bigTR, *smallTR, *mediumTR;
 		 glm::mat3 modelMatrixMain, modelMatrixObj1, modelMatrixObj2, modelMatrixObj3;
 		 glm::mat3 leftWingPosMatrix = glm::mat3(1), rightWingPosMatrix = glm::mat3(1);
 		 glm::mat3 bodyMatrix, headMatrix, beakMatrix, leftWingMatrix, rightWingMatrix, eyesMatrix;
 		 glm::vec2 translate;
 		 bool moveRight, moveUp, movingInward;
-		 bool duckHover, hasEscaped;
+		 bool duckHover, restartHover, exitHover, hasEscaped;
 		 bool showAddedPoints, showLevel;
 		 bool freezeGame;
 		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
