@@ -9,10 +9,15 @@
 #define RATIO_Y					.15f
 #define RES_LIMIT_X				.444f
 #define RES_LIMIT_Y				.625f
-#define MOVE_SPEED				.8f
-//#define MOVE_SPEED_WINGS		(MOVE_SPEED * 2)
+#define MOVE_SPEED				1.0f
 
-#define TIME_LIMIT				20
+#define BIG_FONT_SIZE			100
+#define MEDIUM_FONT_SIZE		75
+#define SMALL_FONT_SIZE			25
+
+#define TIME_LIMIT				5
+#define SHOW_POINTS_TIME		.8f
+#define LEVEL_TIME				1.5f
 
 #define STARTING_POINT_X		(resolution.x / 2 - 150 / 2)
 #define STARTING_POINT_Y		(resolution.y / 4)
@@ -21,6 +26,7 @@
 #define SMALL_OBJ_DIM2			(SMALL_OBJ_DIM * 2)
 #define SCORE_BOX_LENGTH		200
 #define SCORE_UNIT_LENGTH		10
+#define MAX_SCORE				20
 
 #define BODY_SIZE				80
 #define HEAD_SIZE				24
@@ -102,13 +108,15 @@ namespace m1
 
 	 protected:
 		 enum DuckState { ACTIVE, SHOT, ESCAPING, GONE};
-		 gfxc::TextRenderer *tr;
+		 gfxc::TextRenderer *levelTR, *scoreTR, *finalScoreTR;
 		 glm::mat3 modelMatrixMain, modelMatrixObj1, modelMatrixObj2, modelMatrixObj3;
 		 glm::mat3 leftWingPosMatrix = glm::mat3(1), rightWingPosMatrix = glm::mat3(1);
 		 glm::mat3 bodyMatrix, headMatrix, beakMatrix, leftWingMatrix, rightWingMatrix, eyesMatrix;
 		 glm::vec2 translate;
 		 bool moveRight, moveUp, movingInward;
 		 bool duckHover, hasEscaped;
+		 bool showAddedPoints, showLevel;
+		 bool freezeGame;
 		 int leftDownCornerX, leftDownCornerY, rightUpCornerX, rightUpCornerY;
 		 int currPosX, currPosY;
 		 int direction;
@@ -118,7 +126,7 @@ namespace m1
 		 float angularStep;
 		 float leftWingPosX, leftWingPosY;
 		 float rightWingPosX, rightWingPosY;
-		 float totalTime;
 		 float duckSpeed, wingsSpeed;
+		 float totalTime, addedPointsTime, levelTime;
 	};
 }	// namespace m1

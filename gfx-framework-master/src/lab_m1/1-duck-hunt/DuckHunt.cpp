@@ -6,8 +6,6 @@ using namespace gfxc;
 using namespace std;
 using namespace m1;
 
-//TextRenderer* tr;
-
 DuckHunt::DuckHunt()
 {
 
@@ -30,13 +28,24 @@ void DuckHunt::Init()
 	camera->Update();
 	GetCameraInput()->SetActive(false);
 
-	tr = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
-	tr->Load(window->props.selfDir + "\\assets\\fonts\\Hack-Bold.ttf", 128);
+	levelTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	levelTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", BIG_FONT_SIZE);
+
+	scoreTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	scoreTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", SMALL_FONT_SIZE);
+
+	finalScoreTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
+	finalScoreTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", MEDIUM_FONT_SIZE);
 
 	duckCount = 0;
 	lifeCount = 3;
 	scoreCount = 0;
 	level = 1;
+
+	showLevel = true;
+	levelTime = 0;
+
+	freezeGame = false;
 
 	InitNewLevelParams();
 	CreateObjects();
@@ -62,6 +71,9 @@ void DuckHunt::InitNewLevelParams()
 	duckHover = false;
 	bulletCount = 3;
 	totalTime = 0;
+
+	showAddedPoints = false;
+	addedPointsTime = 0;
 
 	// speed values
 	duckSpeed = MOVE_SPEED + (level - 1) * MOVE_SPEED / 2;
@@ -284,6 +296,10 @@ void DuckHunt::RenderScore()
 	for (int i = 0; i < scoreCount; i++) {
 		modelMatrixObj2 *= transform2D::Translate(SCORE_UNIT_LENGTH, 0);
 		RenderMesh2D(meshes["score_unit"], shaders["VertexColor"], modelMatrixObj2);
+	}
+
+	if (showAddedPoints) {
+		scoreTR->RenderText("+ 10 POINTS", 1097, 110, 1, glm::vec3(0, 0, 1));
 	}
 }
 
@@ -541,15 +557,26 @@ void DuckHunt::ComputeWingsPosition(float deltaTimeSeconds)
 
 void DuckHunt::Update(float deltaTimeSeconds)
 {
+	glm::ivec2 resolution = window->GetResolution();
+
+	// functie gestionare timp
 	totalTime += deltaTimeSeconds;
 	cout << totalTime << "\n";
 	cout << duckSpeed << "\n";
 	cout << duckCount << "\n";
 
+	if (showAddedPoints) {
+		addedPointsTime += deltaTimeSeconds;
+	}
+
+	if (showLevel) {
+		levelTime += deltaTimeSeconds;
+	}
+
 	// render background function - macros pentru positions si scale
 	RenderMesh(meshes["sky"], shaders["VertexColor"], glm::vec3(0, 0, -200), glm::vec3(1, 1, 1));
 	RenderMesh(meshes["pixelated_grass"], glm::vec3(650, 270, 0), glm::vec3(200, 180, 0));
-	RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
+	//RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
 	RenderMesh(meshes["ground"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
 
 	if (totalTime >= TIME_LIMIT && duckState == ACTIVE) {
@@ -563,11 +590,18 @@ void DuckHunt::Update(float deltaTimeSeconds)
 
 		duckCount++;
 
-		if (duckCount % 4 == 0) {
+		if (duckCount % 4 == 0 && duckCount < MAX_SCORE) {
 			level++;
+
+			showLevel = true;
+			levelTime = 0;
 		}
 
 		InitNewLevelParams();
+	}
+
+	if (showLevel) {
+		levelTR->RenderText("LEVEL " + to_string(level), resolution.x / 2 - 150, resolution.y / 2 - 100, 1, glm::vec3(0, 0, 1));
 	}
 
 	hasEscaped = false;
@@ -582,23 +616,37 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	RenderLives();
 	RenderScore();
 
-	ComputeDuckPosition(deltaTimeSeconds);
-	ComputeWingsPosition(deltaTimeSeconds);
-	RenderDuck(modelMatrixMain);
+	if (addedPointsTime >= SHOW_POINTS_TIME) {
+		showAddedPoints = false;
+		addedPointsTime = 0;
+	}
+
+	if (levelTime >= LEVEL_TIME) {
+		showLevel = false;	
+		levelTime = 0;
+	}
+
+	if (duckCount == MAX_SCORE || lifeCount == 0) {
+		levelTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 200, 1, glm::vec3(0, 0, 1));
+
+		// change color??
+		finalScoreTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 100, 1, glm::vec3(0, 0, 0));
+
+		bulletCount = 3;
+		freezeGame = true;
+	}
+
+	//cout << "score: " << scoreCount << "\n";
+
+	if (!freezeGame) {
+		ComputeDuckPosition(deltaTimeSeconds);
+		ComputeWingsPosition(deltaTimeSeconds);
+		RenderDuck(modelMatrixMain);
+	}
 
 	//RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
 	//RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
-
-	//tr->RenderText("TEST", 50, 50, 1, glm::vec3(0, 0, 1));
-
-	tr->RenderText("TEXT", 50, 50, 1.0f, glm::vec3(0, 0, 1));
-
 	//RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
-	
-
-	//tr->RenderText("TEST", 50, 50, .5f, glm::vec3(0, 0, 1));
-
-	//tr->RenderText("TEST", 50, 50, .5f, glm::vec3(0, 0, 1));
 }
 
 void DuckHunt::FrameEnd()
@@ -675,6 +723,8 @@ void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 			cout << "I've been shot\n";
 
 			scoreCount++;
+
+			showAddedPoints = true;
 		}
 
 		bulletCount--;
