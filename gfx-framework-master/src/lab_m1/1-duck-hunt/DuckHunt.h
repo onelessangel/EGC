@@ -15,7 +15,7 @@
 #define MEDIUM_FONT_SIZE		75
 #define SMALL_FONT_SIZE			25
 
-#define TIME_LIMIT				5
+#define TIME_LIMIT				4
 #define SHOW_POINTS_TIME		.8f
 #define LEVEL_TIME				1.5f
 
@@ -123,11 +123,13 @@ namespace m1
 		 int direction;
 		 int duckCount, bulletCount, lifeCount, scoreCount;
 		 int level;
+		 int randomColor;
 		 DuckState duckState;
 		 float angularStep;
 		 float leftWingPosX, leftWingPosY;
 		 float rightWingPosX, rightWingPosY;
 		 float duckSpeed, wingsSpeed;
 		 float totalTime, addedPointsTime, levelTime;
+		 std::string restartText, exitText;
 	};
 }	// namespace m1

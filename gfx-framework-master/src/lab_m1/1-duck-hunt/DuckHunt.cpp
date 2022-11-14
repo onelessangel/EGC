@@ -64,6 +64,9 @@ void DuckHunt::InitNewLevelParams()
 	translate.x = 0;
 	translate.y = 0;
 
+	randomColor = rand() % 4 + 1;
+	cout << randomColor << "\n";
+
 	// duck is initially ACTIVE
 	duckState = ACTIVE;
 
@@ -89,7 +92,7 @@ void DuckHunt::InitNewLevelParams()
 
 void DuckHunt::CreateObjects()
 {
-	glm::vec3 corner, centerPos, color;
+	glm::vec3 corner, centerPos, color, color1, color2, color3, color4;
 	float height, length;
 
 	glm::ivec2 resolution = window->GetResolution();
@@ -113,29 +116,59 @@ void DuckHunt::CreateObjects()
 	// DUCK - BODY
 	corner = glm::vec3(0);
 	length = BODY_SIZE;
-	//color = glm::vec3(0.309, 0.168, 0.149);
-	color = glm::vec3(0, 0, 1);
+	color1 = glm::vec3(0.560, 0.290, 0.247);
+	//color = glm::vec3(0, 0, 1);
+	color2 = glm::vec3(0.772, 0.360, 0.086);
+	color3 = glm::vec3(0.796, 0.211, 0.129);
+	color4 = glm::vec3(0.423, 0.239, 0.611);
 
-	Mesh* duckBody = Objects2D::CreateTriangle("duck_body", corner, length, color, true);
-	AddMeshToList(duckBody);
+	Mesh* duckBody1 = Objects2D::CreateTriangle("duck_body1", corner, length, color1, true);
+	Mesh* duckBody2 = Objects2D::CreateTriangle("duck_body2", corner, length, color2, true);
+	Mesh* duckBody3 = Objects2D::CreateTriangle("duck_body3", corner, length, color3, true);
+	Mesh* duckBody4 = Objects2D::CreateTriangle("duck_body4", corner, length, color4, true);
+
+	AddMeshToList(duckBody1);
+	AddMeshToList(duckBody2);
+	AddMeshToList(duckBody3);
+	AddMeshToList(duckBody4);
 
 	// DUCK - LEFT WING
 	corner = glm::vec3(0);
 	length = L_WING_SIZE;
-	//color = glm::vec3(0.309, 0.168, 0.149);
-	color = glm::vec3(1, 0, 0);
+	color1 = glm::vec3(0.309, 0.168, 0.149);
+	//color = glm::vec3(1, 0, 0);
+	color2 = glm::vec3(0.584, 0.274, 0.066);
+	color3 = glm::vec3(0.537, 0.145, 0.086);
+	color4 = glm::vec3(0.309, 0.172, 0.447);
 
-	Mesh* leftDuckWing = Objects2D::CreateTriangle("left_duck_wing", corner, length, color, true);
-	AddMeshToList(leftDuckWing);
+	Mesh* leftDuckWing1 = Objects2D::CreateTriangle("left_duck_wing1", corner, length, color1, true);
+	Mesh* leftDuckWing2 = Objects2D::CreateTriangle("left_duck_wing2", corner, length, color2, true);
+	Mesh* leftDuckWing3 = Objects2D::CreateTriangle("left_duck_wing3", corner, length, color3, true);
+	Mesh* leftDuckWing4 = Objects2D::CreateTriangle("left_duck_wing4", corner, length, color4, true);
+
+	AddMeshToList(leftDuckWing1);
+	AddMeshToList(leftDuckWing2);
+	AddMeshToList(leftDuckWing3);
+	AddMeshToList(leftDuckWing4);
 
 	// DUCK - RIGHT WING
 	corner = glm::vec3(0);
 	length = R_WING_SIZE;
-	//color = glm::vec3(0.309, 0.168, 0.149);
-	color = glm::vec3(1, 0, 0);
+	color1 = glm::vec3(0.309, 0.168, 0.149);
+	//color = glm::vec3(1, 0, 0);
+	color2 = glm::vec3(0.584, 0.274, 0.066);
+	color3 = glm::vec3(0.537, 0.145, 0.086);
+	color4 = glm::vec3(0.309, 0.172, 0.447);
 
-	Mesh* rightDuckWing = Objects2D::CreateTriangle("right_duck_wing", corner, length, color, true);
-	AddMeshToList(rightDuckWing);
+	Mesh* rightDuckWing1 = Objects2D::CreateTriangle("right_duck_wing1", corner, length, color1, true);
+	Mesh* rightDuckWing2 = Objects2D::CreateTriangle("right_duck_wing2", corner, length, color2, true);
+	Mesh* rightDuckWing3 = Objects2D::CreateTriangle("right_duck_wing3", corner, length, color3, true);
+	Mesh* rightDuckWing4 = Objects2D::CreateTriangle("right_duck_wing4", corner, length, color4, true);
+
+	AddMeshToList(rightDuckWing1);
+	AddMeshToList(rightDuckWing2);
+	AddMeshToList(rightDuckWing3);
+	AddMeshToList(rightDuckWing4);
 
 	// DUCK - BEAK
 	corner = glm::vec3(0);
@@ -153,36 +186,44 @@ void DuckHunt::CreateObjects()
 	AddMeshToList(duckEyes);
 
 	// GROUND
-	corner = glm::vec3(0, 0, 0);
+	/*corner = glm::vec3(0, 0, 0);
 	height = (float) resolution.y / 4;
 	length = (float) resolution.x;
 	color = glm::vec3(0.337, 0.184, 0.129);
 
-	Mesh* ground = Objects2D::CreateRectangle("ground", corner, height, length, color, true);
-	AddMeshToList(ground);
+	Mesh* ground = Objects2D::CreateRectangle("ground_basic", corner, height, length, color, true);
+	AddMeshToList(ground);*/
+
+	Mesh* pixelatedGround = new Mesh("pixelated_ground");
+	pixelatedGround->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_ground"), "pixelated_ground.fbx");
+	meshes[pixelatedGround->GetMeshID()] = pixelatedGround;
 
 	// GRASS
-	corner = glm::vec3(0, resolution.y / 4, 0);
-	height = (float) resolution.y / 4;
-	length = (float) resolution.x;
+	//corner = glm::vec3(0, resolution.y / 4, 0);
+	//height = (float) resolution.y / 4;
+	//length = (float) resolution.x;
 	//color = glm::vec3(0.047, 0.714, 0.012);
-	color = glm::vec3(1, 0, 0);
 
-	Mesh* grass = Objects2D::CreateRectangle("grass", corner, height, length, color, false);
-	AddMeshToList(grass);
+	//Mesh* grass = Objects2D::CreateRectangle("grass", corner, height, length, color, false);
+	//AddMeshToList(grass);
 
-	Mesh* mesh = new Mesh("pixelated_grass");
-	mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_grass"), "pixelated_grass.fbx");
-	meshes[mesh->GetMeshID()] = mesh;
+	Mesh* pixelatedGrass = new Mesh("pixelated_grass");
+	pixelatedGrass->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_grass"), "pixelated_grass.fbx");
+	meshes[pixelatedGrass->GetMeshID()] = pixelatedGrass;
 
 	// SKY
-	corner = glm::vec3(0, resolution.y / 2, 0);
-	height = (float) resolution.y / 2;
-	length = (float) resolution.x;
-	color = glm::vec3(0.686, 0.894, 0.996);
+	//corner = glm::vec3(0, resolution.y / 2, 0);
+	//height = (float) resolution.y / 2;
+	//length = (float) resolution.x;
+	//color = glm::vec3(0.686, 0.894, 0.996);
 
-	Mesh* sky = Objects2D::CreateRectangle("sky", corner, height, length, color, true);
-	AddMeshToList(sky);
+	//Mesh* sky = Objects2D::CreateRectangle("sky", corner, height, length, color, false);
+	//AddMeshToList(sky);
+
+	Mesh* pixelatedSky = new Mesh("pixelated_sky");
+	pixelatedSky->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_sky"), "pixelated_sky.fbx");
+	meshes[pixelatedSky->GetMeshID()] = pixelatedSky;
+
 
 	// LIFE
 	centerPos = glm::vec3(0);
@@ -410,9 +451,9 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix)
 	RenderMesh2D(meshes["duck_eyes"], shaders["VertexColor"], eyesMatrix);
 	RenderMesh2D(meshes["duck_head"], shaders["VertexColor"], headMatrix);
 	RenderMesh2D(meshes["duck_beak"], shaders["VertexColor"], beakMatrix);
-	RenderMesh2D(meshes["left_duck_wing"], shaders["VertexColor"], leftWingMatrix);
-	RenderMesh2D(meshes["duck_body"], shaders["VertexColor"], bodyMatrix);
-	RenderMesh2D(meshes["right_duck_wing"], shaders["VertexColor"], rightWingMatrix);
+	RenderMesh2D(meshes["left_duck_wing" + to_string(randomColor)], shaders["VertexColor"], leftWingMatrix);
+	RenderMesh2D(meshes["duck_body" + to_string(randomColor)], shaders["VertexColor"], bodyMatrix);
+	RenderMesh2D(meshes["right_duck_wing" + to_string(randomColor)], shaders["VertexColor"], rightWingMatrix);
 
 	//RenderMesh2D(meshes["duck"], shaders["VertexColor"], modelMatrixObj1);
 
@@ -426,10 +467,6 @@ void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
 
 	// set starting point
 	modelMatrixMain = transform2D::Translate(STARTING_POINT_X, STARTING_POINT_Y);
-
-	// dc e rezolutia relativa la starting modelMatrix??
-
-	//cout << duckState << "\n";
 
 	switch (duckState) {
 		case ACTIVE:
@@ -580,11 +617,12 @@ void DuckHunt::Update(float deltaTimeSeconds)
 		levelTime += deltaTimeSeconds;
 	}
 
-	// render background function - macros pentru positions si scale
-	RenderMesh(meshes["sky"], shaders["VertexColor"], glm::vec3(0, 0, -200), glm::vec3(1, 1, 1));
+	//RenderMesh(meshes["sky"], shaders["VertexColor"], glm::vec3(0, 0, -200), glm::vec3(1, 1, 1));
+	RenderMesh(meshes["pixelated_sky"], glm::vec3(625, 550, -200), glm::vec3(550, 380, 0));
 	RenderMesh(meshes["pixelated_grass"], glm::vec3(650, 270, 0), glm::vec3(200, 180, 0));
 	//RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
-	RenderMesh(meshes["ground"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
+	//RenderMesh(meshes["ground_basic"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
+	RenderMesh(meshes["pixelated_ground"], glm::vec3(650, 100, 0), glm::vec3(220, 200, 0));
 
 	if (totalTime >= TIME_LIMIT && duckState == ACTIVE) {
 		duckState = ESCAPING;
@@ -636,14 +674,26 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	if (duckCount == MAX_SCORE || lifeCount == 0) {
 		bigTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 250, 1, glm::vec3(0, 0, 1));
 		mediumTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 150, 1, glm::vec3(0, 0, .502));
-		mediumTR->RenderText("TRY AGAIN", resolution.x / 2 - 150, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
-		mediumTR->RenderText("EXIT", resolution.x / 2 + 125, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+
+		if (restartHover) {
+			mediumTR->RenderText(">TRY AGAIN", resolution.x / 2 - 155, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+		}
+		else {
+			mediumTR->RenderText("TRY AGAIN", resolution.x / 2 - 150, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+		}
+		
+
+		if (exitHover) {
+			mediumTR->RenderText(">EXIT", resolution.x / 2 + 120, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+		}
+		else {
+			mediumTR->RenderText("EXIT", resolution.x / 2 + 125, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+		}
+		
 
 		bulletCount = 3;
 		freezeGame = true;
 	}
-
-	//cout << "score: " << scoreCount << "\n";
 
 	if (!freezeGame) {
 		ComputeDuckPosition(deltaTimeSeconds);
@@ -651,7 +701,7 @@ void DuckHunt::Update(float deltaTimeSeconds)
 		RenderDuck(modelMatrixMain);
 	}
 
-	//RenderMesh2D(meshes["ground"], shaders["VertexColor"], glm::mat3(1));
+	//RenderMesh2D(meshes["ground_basic"], shaders["VertexColor"], glm::mat3(1));
 	//RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
 	//RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
 }
@@ -719,7 +769,7 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 		return;
 	}
 
-	leftDownCornerX = 620;
+	leftDownCornerX = 490;
 	leftDownCornerY = 304;
 	rightUpCornerX = 665;
 	rightUpCornerY = 270;
@@ -731,8 +781,23 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 		restartHover = true;
 		cout << "mouse is over button\n";
 	}
-	//cout << "$$$" << leftDownCornerX << " " << rightUpCornerX << "$$$\n";
-	//cout << "***" << leftDownCornerY << " " << rightUpCornerY << "***\n";
+	else {
+		restartHover = false;
+	}
+
+	leftDownCornerX = 760;
+	leftDownCornerY = 304;
+	rightUpCornerX = 830;
+	rightUpCornerY = 280;
+
+	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
+		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
+		exitHover = true;
+		cout << "mouse is over button\n";
+	}
+	else {
+		exitHover = false;
+	}
 }
 
 
@@ -744,6 +809,12 @@ void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 			if (restartHover) {
 				NewGameInit();
 			}
+
+			if (exitHover) {
+				exit(0);
+			}
+
+			return;
 		}
 
 		if (duckHover && duckState != SHOT && bulletCount > 0) {
@@ -756,7 +827,6 @@ void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 		}
 
 		bulletCount--;
-		//cout << "bulletCount: " << bulletCount << "\n";
 	}
 }
 
