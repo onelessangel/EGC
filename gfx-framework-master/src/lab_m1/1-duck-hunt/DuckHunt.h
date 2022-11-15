@@ -9,13 +9,13 @@
 #define RATIO_Y					.15f
 #define RES_LIMIT_X				.444f
 #define RES_LIMIT_Y				.625f
-#define MOVE_SPEED				1.0f
+#define MOVE_SPEED				.5f
 
 #define BIG_FONT_SIZE			100
 #define MEDIUM_FONT_SIZE		75
 #define SMALL_FONT_SIZE			25
 
-#define TIME_LIMIT				4
+#define TIME_LIMIT				5
 #define SHOW_POINTS_TIME		.8f
 #define LEVEL_TIME				1.5f
 
@@ -105,7 +105,7 @@ namespace m1
 		 void ComputeDuckPosition(float deltaTimeSeconds);
 		 void ComputeDuckRotation();
 		 void ComputeWingsPosition(float deltaTimeSeconds);
-		 void ComputeDuckState();
+		 void ShowEndMenu();
 
 	 protected:
 		 enum DuckState { ACTIVE, SHOT, ESCAPING, GONE};

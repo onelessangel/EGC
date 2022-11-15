@@ -28,6 +28,7 @@ void DuckHunt::Init()
 	camera->Update();
 	GetCameraInput()->SetActive(false);
 
+	// define text renderers
 	bigTR = new gfxc::TextRenderer(window->props.selfDir, window->GetResolution().x, window->GetResolution().y);
 	bigTR->Load(window->props.selfDir + "\\assets\\fonts\\ARCADE.TTF", BIG_FONT_SIZE);
 
@@ -65,7 +66,6 @@ void DuckHunt::InitNewLevelParams()
 	translate.y = 0;
 
 	randomColor = rand() % 4 + 1;
-	cout << randomColor << "\n";
 
 	// duck is initially ACTIVE
 	duckState = ACTIVE;
@@ -117,7 +117,6 @@ void DuckHunt::CreateObjects()
 	corner = glm::vec3(0);
 	length = BODY_SIZE;
 	color1 = glm::vec3(0.560, 0.290, 0.247);
-	//color = glm::vec3(0, 0, 1);
 	color2 = glm::vec3(0.772, 0.360, 0.086);
 	color3 = glm::vec3(0.796, 0.211, 0.129);
 	color4 = glm::vec3(0.423, 0.239, 0.611);
@@ -136,7 +135,6 @@ void DuckHunt::CreateObjects()
 	corner = glm::vec3(0);
 	length = L_WING_SIZE;
 	color1 = glm::vec3(0.309, 0.168, 0.149);
-	//color = glm::vec3(1, 0, 0);
 	color2 = glm::vec3(0.584, 0.274, 0.066);
 	color3 = glm::vec3(0.537, 0.145, 0.086);
 	color4 = glm::vec3(0.309, 0.172, 0.447);
@@ -155,7 +153,6 @@ void DuckHunt::CreateObjects()
 	corner = glm::vec3(0);
 	length = R_WING_SIZE;
 	color1 = glm::vec3(0.309, 0.168, 0.149);
-	//color = glm::vec3(1, 0, 0);
 	color2 = glm::vec3(0.584, 0.274, 0.066);
 	color3 = glm::vec3(0.537, 0.145, 0.086);
 	color4 = glm::vec3(0.309, 0.172, 0.447);
@@ -186,40 +183,16 @@ void DuckHunt::CreateObjects()
 	AddMeshToList(duckEyes);
 
 	// GROUND
-	/*corner = glm::vec3(0, 0, 0);
-	height = (float) resolution.y / 4;
-	length = (float) resolution.x;
-	color = glm::vec3(0.337, 0.184, 0.129);
-
-	Mesh* ground = Objects2D::CreateRectangle("ground_basic", corner, height, length, color, true);
-	AddMeshToList(ground);*/
-
 	Mesh* pixelatedGround = new Mesh("pixelated_ground");
 	pixelatedGround->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_ground"), "pixelated_ground.fbx");
 	meshes[pixelatedGround->GetMeshID()] = pixelatedGround;
 
 	// GRASS
-	//corner = glm::vec3(0, resolution.y / 4, 0);
-	//height = (float) resolution.y / 4;
-	//length = (float) resolution.x;
-	//color = glm::vec3(0.047, 0.714, 0.012);
-
-	//Mesh* grass = Objects2D::CreateRectangle("grass", corner, height, length, color, false);
-	//AddMeshToList(grass);
-
 	Mesh* pixelatedGrass = new Mesh("pixelated_grass");
 	pixelatedGrass->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_grass"), "pixelated_grass.fbx");
 	meshes[pixelatedGrass->GetMeshID()] = pixelatedGrass;
 
 	// SKY
-	//corner = glm::vec3(0, resolution.y / 2, 0);
-	//height = (float) resolution.y / 2;
-	//length = (float) resolution.x;
-	//color = glm::vec3(0.686, 0.894, 0.996);
-
-	//Mesh* sky = Objects2D::CreateRectangle("sky", corner, height, length, color, false);
-	//AddMeshToList(sky);
-
 	Mesh* pixelatedSky = new Mesh("pixelated_sky");
 	pixelatedSky->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/pixelated_sky"), "pixelated_sky.fbx");
 	meshes[pixelatedSky->GetMeshID()] = pixelatedSky;
@@ -301,7 +274,7 @@ void DuckHunt::RenderLives()
 
 void DuckHunt::RenderBullets()
 {
-	modelMatrixMain = transform2D::Translate(1195, 667);	// 680 - LIFE_RADIUS
+	modelMatrixMain = transform2D::Translate(1195, 667);
 
 	// init pos
 	modelMatrixObj1 = glm::mat3(1);
@@ -328,7 +301,7 @@ void DuckHunt::RenderBullets()
 
 void DuckHunt::RenderScore()
 {
-	modelMatrixMain = transform2D::Translate(1070, 667 - SMALL_OBJ_DIM2 - SMALL_OBJ_DIM);	 // 1087 = 1100 (life) - 13 (small_dim)
+	modelMatrixMain = transform2D::Translate(1070, 667 - SMALL_OBJ_DIM2 - SMALL_OBJ_DIM);
 
 	// init pos
 	modelMatrixObj1 = glm::mat3(1);
@@ -353,16 +326,6 @@ void DuckHunt::RenderScore()
 
 void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix)
 {
-	//eyesMatrix = glm::mat3(1);
-	//headMatrix = glm::mat3(1);
-	//beakMatrix = glm::mat3(1);
-	//bodyMatrix = glm::mat3(1);
-	//leftWingMatrix = glm::mat3(1);
-	//rightWingMatrix = glm::mat3(1);
-
-	//modelMatrixObj1 = glm::mat3(1);
-
-
 	// transform duck pos
 	eyesMatrix = duckPosMatrix;
 	headMatrix = duckPosMatrix;
@@ -370,8 +333,6 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix)
 	bodyMatrix = duckPosMatrix;
 	leftWingMatrix = duckPosMatrix;
 	rightWingMatrix = duckPosMatrix;
-
-	//modelMatrixObj1 = duckPosMatrix;
 
 	ComputeDuckRotation();
 
@@ -383,11 +344,9 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix)
 	leftWingMatrix *= modelMatrixObj2;
 	rightWingMatrix *= modelMatrixObj2;
 
-
 	// rotate wings
 	leftWingMatrix *= leftWingPosMatrix;
 	rightWingMatrix *= rightWingPosMatrix;
-
 
 	// reassemble the duck
 
@@ -454,11 +413,6 @@ void DuckHunt::RenderDuck(glm::mat3 duckPosMatrix)
 	RenderMesh2D(meshes["left_duck_wing" + to_string(randomColor)], shaders["VertexColor"], leftWingMatrix);
 	RenderMesh2D(meshes["duck_body" + to_string(randomColor)], shaders["VertexColor"], bodyMatrix);
 	RenderMesh2D(meshes["right_duck_wing" + to_string(randomColor)], shaders["VertexColor"], rightWingMatrix);
-
-	//RenderMesh2D(meshes["duck"], shaders["VertexColor"], modelMatrixObj1);
-
-	/*cout << "(" << translate.x << ", " << translate.y << ") ";
-	cout << "(" << translate.x + TOTAL_DUCK_LENGTH << ", " << translate.y + TOTAL_DUCK_HEIGHT << ")\n";*/
 }
 
 void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
@@ -515,7 +469,6 @@ void DuckHunt::ComputeDuckPosition(float deltaTimeSeconds)
 			if (translate.y >= resolution.y) {
 				duckState = GONE;
 				hasEscaped = true;
-				cout << "duck has escaped\n";
 			}
 			break;
 	}
@@ -599,15 +552,34 @@ void DuckHunt::ComputeWingsPosition(float deltaTimeSeconds)
 	rightWingPosMatrix *= transform2D::Translate(-rightWingPosX, -rightWingPosY);
 }
 
+void DuckHunt::ShowEndMenu()
+{
+	glm::ivec2 resolution = window->GetResolution();
+
+	bigTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 250, 1, glm::vec3(0, 0, 1));
+	mediumTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 150, 1, glm::vec3(0, 0, .502));
+
+	if (restartHover) {
+		mediumTR->RenderText(">TRY AGAIN", resolution.x / 2 - 155, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+	}
+	else {
+		mediumTR->RenderText("TRY AGAIN", resolution.x / 2 - 150, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+	}
+
+
+	if (exitHover) {
+		mediumTR->RenderText(">EXIT", resolution.x / 2 + 120, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+	}
+	else {
+		mediumTR->RenderText("EXIT", resolution.x / 2 + 125, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
+	}
+}
+
 void DuckHunt::Update(float deltaTimeSeconds)
 {
 	glm::ivec2 resolution = window->GetResolution();
 
-	// functie gestionare timp
 	totalTime += deltaTimeSeconds;
-	cout << totalTime << "\n";
-	cout << duckSpeed << "\n";
-	cout << duckCount << "\n";
 
 	if (showAddedPoints) {
 		addedPointsTime += deltaTimeSeconds;
@@ -617,11 +589,9 @@ void DuckHunt::Update(float deltaTimeSeconds)
 		levelTime += deltaTimeSeconds;
 	}
 
-	//RenderMesh(meshes["sky"], shaders["VertexColor"], glm::vec3(0, 0, -200), glm::vec3(1, 1, 1));
+	// render background
 	RenderMesh(meshes["pixelated_sky"], glm::vec3(625, 550, -200), glm::vec3(550, 380, 0));
 	RenderMesh(meshes["pixelated_grass"], glm::vec3(650, 270, 0), glm::vec3(200, 180, 0));
-	//RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
-	//RenderMesh(meshes["ground_basic"], shaders["VertexColor"], glm::vec3(0, 0, 5), glm::vec3(1, 1, 1));
 	RenderMesh(meshes["pixelated_ground"], glm::vec3(650, 100, 0), glm::vec3(220, 200, 0));
 
 	if (totalTime >= TIME_LIMIT && duckState == ACTIVE) {
@@ -672,25 +642,7 @@ void DuckHunt::Update(float deltaTimeSeconds)
 	}
 
 	if (duckCount == MAX_SCORE || lifeCount == 0) {
-		bigTR->RenderText("GAME OVER", resolution.x / 2 - 200, resolution.y / 2 - 250, 1, glm::vec3(0, 0, 1));
-		mediumTR->RenderText("Your score: " + to_string(scoreCount * 10), resolution.x / 2 - 225, resolution.y / 2 - 150, 1, glm::vec3(0, 0, .502));
-
-		if (restartHover) {
-			mediumTR->RenderText(">TRY AGAIN", resolution.x / 2 - 155, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
-		}
-		else {
-			mediumTR->RenderText("TRY AGAIN", resolution.x / 2 - 150, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
-		}
-		
-
-		if (exitHover) {
-			mediumTR->RenderText(">EXIT", resolution.x / 2 + 120, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
-		}
-		else {
-			mediumTR->RenderText("EXIT", resolution.x / 2 + 125, resolution.y / 2 - 75, .5f, glm::vec3(0, 0, 1));
-		}
-		
-
+		ShowEndMenu();
 		bulletCount = 3;
 		freezeGame = true;
 	}
@@ -700,10 +652,6 @@ void DuckHunt::Update(float deltaTimeSeconds)
 		ComputeWingsPosition(deltaTimeSeconds);
 		RenderDuck(modelMatrixMain);
 	}
-
-	//RenderMesh2D(meshes["ground_basic"], shaders["VertexColor"], glm::mat3(1));
-	//RenderMesh2D(meshes["grass"], shaders["VertexColor"], glm::mat3(1));
-	//RenderMesh2D(meshes["sky"], shaders["VertexColor"], glm::mat3(1));
 }
 
 void DuckHunt::FrameEnd()
@@ -748,7 +696,6 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 			if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
 				currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
 				duckHover = true;
-				//cout << "mouse is over duck\n";
 			}
 		}
 
@@ -762,7 +709,6 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 			if (currPosX >= rightUpCornerX && currPosX <= leftDownCornerX &&
 				currPosY <= leftDownCornerY && currPosX >= rightUpCornerY) {
 				duckHover = true;
-				//cout << "mouse is over duck\n";
 			}
 		}
 
@@ -774,12 +720,9 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 	rightUpCornerX = 665;
 	rightUpCornerY = 270;
 
-	cout << currPosX << " " << currPosY << "\n";
-
 	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
 		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
 		restartHover = true;
-		cout << "mouse is over button\n";
 	}
 	else {
 		restartHover = false;
@@ -793,7 +736,6 @@ void DuckHunt::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 	if (currPosX >= leftDownCornerX && currPosX <= rightUpCornerX &&
 		currPosY <= leftDownCornerY && currPosY >= rightUpCornerY) {
 		exitHover = true;
-		cout << "mouse is over button\n";
 	}
 	else {
 		exitHover = false;
@@ -819,10 +761,7 @@ void DuckHunt::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
 		if (duckHover && duckState != SHOT && bulletCount > 0) {
 			duckState = SHOT;
-			cout << "I've been shot\n";
-
 			scoreCount++;
-
 			showAddedPoints = true;
 		}
 
