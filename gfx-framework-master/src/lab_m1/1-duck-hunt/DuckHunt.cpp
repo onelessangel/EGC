@@ -95,9 +95,7 @@ void DuckHunt::CreateObjects()
 	glm::vec3 corner, centerPos, color, color1, color2, color3, color4;
 	float height, length;
 
-	glm::ivec2 resolution = window->GetResolution();
-
-	// DUCK - RECTANGLE
+	// DUCK - RECTANGLE - used for debug
 	corner = glm::vec3(0);
 	height = TOTAL_DUCK_HEIGHT;
 	length = TOTAL_DUCK_LENGTH;
