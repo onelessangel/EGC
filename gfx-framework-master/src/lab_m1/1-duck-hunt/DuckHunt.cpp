@@ -70,7 +70,7 @@ void DuckHunt::InitNewLevelParams()
 	// duck is initially ACTIVE
 	duckState = ACTIVE;
 
-	moveRight = true;
+	moveRight = (rand() % 2 == 0);
 	moveUp = true;
 
 	movingInward = true;

@@ -75,7 +75,7 @@ namespace implemented
             position += glm::normalize(right) * distance;
         }
 
-        void RotateFirstPerson_OX(float angle)
+        void RotateFirstPerson_OX(float angle)  // OX - right
         {
             // TODO(student): Compute the new `forward` and `up` vectors.
             // Don't forget to normalize the vectors! Use `glm::rotate()`.
@@ -85,7 +85,7 @@ namespace implemented
             
         }
 
-        void RotateFirstPerson_OY(float angle)
+        void RotateFirstPerson_OY(float angle)  // OY - up
         {
             // TODO(student): Compute the new `forward`, `up` and `right`
             // vectors. Use `glm::rotate()`. Don't forget to normalize the
@@ -99,7 +99,7 @@ namespace implemented
             up = glm::cross(right, forward);
         }
 
-        void RotateFirstPerson_OZ(float angle)
+        void RotateFirstPerson_OZ(float angle)  // OZ - forward
         {
             // TODO(student): Compute the new `right` and `up`. This time,
             // `forward` stays the same. Use `glm::rotate()`. Don't forget

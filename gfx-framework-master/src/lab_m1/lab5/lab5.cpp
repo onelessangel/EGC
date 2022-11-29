@@ -189,7 +189,7 @@ void Lab5::OnInputUpdate(float deltaTime, int mods)
     // variables you might need in the class header. Inspect this file
     // for any hardcoded projection arguments (can you find any?) and
     // replace them with those extra variables.
-           if (window->KeyHold(GLFW_KEY_Z)) {
+        if (window->KeyHold(GLFW_KEY_Z)) {
             fov += deltaTime;
             projectionMatrix = glm::perspective(fov, window->props.aspectRatio, 0.01f, 100.0f);
         }
