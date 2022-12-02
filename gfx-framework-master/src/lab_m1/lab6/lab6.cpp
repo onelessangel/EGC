@@ -214,11 +214,11 @@ void Lab6::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     glm::mat4 projectionMatrix = GetSceneCamera()->GetProjectionMatrix();
     glUniformMatrix4fv(projLocation, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
-    //// BONUS: Get shader location for "Time"
-    //GLint timeLocation = glGetUniformLocation(shader->GetProgramID(), "Time");
+    // BONUS: Get shader location for "Time"
+    GLint timeLocation = glGetUniformLocation(shader->GetProgramID(), "Time");
 
-    //// BONUS: Set shader uniform "Time" to elapsed time
-    //glUniform1f(timeLocation, (GLfloat)Engine::GetElapsedTime());
+    // BONUS: Set shader uniform "Time" to elapsed time
+    glUniform1f(timeLocation, (GLfloat)Engine::GetElapsedTime());
 
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
