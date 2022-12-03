@@ -132,6 +132,7 @@ void Lab2::Init()
         meshes["square"]->InitFromData(sqr_vertices, sqr_indices);
     }
 
+    // Create a disc
     {
         vector<VertexFormat> circle_vertices;
         vector<GLuint> circle_indices;
