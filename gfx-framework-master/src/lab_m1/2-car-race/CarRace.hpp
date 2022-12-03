@@ -5,6 +5,11 @@
 #include "components/simple_scene.h"
 #include "components/text_renderer.h"
 
+//#include "lab_m1/2-car-race/Objects.hpp"
+
+#define NO_VERTICES         333
+#define DIST_TO_BACKBONE    0.9f
+
 namespace m1
 {
 	class CarRace : public gfxc::SimpleScene
@@ -29,19 +34,11 @@ namespace m1
 		void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		void OnWindowResize(int width, int height) override;
 
-		void NewGameInit();
-		void InitNewLevelParams();
-		void CreateObjects();
-		void RenderLives();
-		void RenderBullets();
-		void RenderScore();
-		void RenderDuck(glm::mat3 duckPosMatrix);
-		void ComputeDuckPosition(float deltaTimeSeconds);
-		void ComputeDuckRotation();
-		void ComputeWingsPosition(float deltaTimeSeconds);
-		void ShowEndMenu();
+		void CreateRaceTrack(const std::string& name, glm::vec3 color);
+		void CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices);
 
 	protected:
-		
+		GLenum polygonMode;
+
 	};
 }	// namespace m1

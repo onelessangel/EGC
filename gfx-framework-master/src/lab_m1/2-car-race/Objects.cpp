@@ -1,23 +1,11 @@
-#include "lab_m1/2-car-race/CarRace.hpp"
+#include "lab_m1/2-car-race/Objects.hpp"
 
-using namespace gfxc;
-using namespace std;
-using namespace m1;
-//using namespace objects;
+using namespace objects;
 
-CarRace::CarRace()
-{
-
-}
-
-CarRace::~CarRace()
-{
-
-}
-
-void CarRace::CreateRaceTrack(
-	const std::string& name,
-	glm::vec3 color)
+void Objects::CreateRaceTrack(
+	const std::string &name,
+	glm::vec3 color,
+	bool fill)
 {
 	std::vector<VertexFormat> backboneVertices =
 	{
@@ -48,7 +36,7 @@ void CarRace::CreateRaceTrack(
 		VertexFormat(glm::vec3(-20.443603032985003, 0, 9.247341928730892)),      // A1
 		VertexFormat(glm::vec3(-19.76684079764371, 0, 8.80943695292182)),        // B1
 		VertexFormat(glm::vec3(-19.010459475791674, 0, 8.65019877990034)),       // C1
-		//VertexFormat(glm::vec3((-18.17125, 0, 8.79462))),					     // D1
+		VertexFormat(glm::vec3(5.538776992961004, 0, 9.990319293141454)),        // D
 		VertexFormat(glm::vec3(-17.378268202321497, 0, 9.287151471986261)),      // E1
 		VertexFormat(glm::vec3(-16.86074414000168, 0, 10.362009139881255)),      // F1
 		VertexFormat(glm::vec3(-16.64296823513535, 0, 11.23296296106766)),       // G1
@@ -130,7 +118,7 @@ void CarRace::CreateRaceTrack(
 		VertexFormat(glm::vec3(0.18950415955530608, 0, 12.671420122233126)),     // K4
 		VertexFormat(glm::vec3(0, 0, 12)),                                       // L4
 		VertexFormat(glm::vec3(-0.0880928364590826, 0, 11.460087775988523)),     // M4
-		VertexFormat(glm::vec3(-0.18581, 0, 10.96135)),							 // N4
+		VertexFormat(glm::vec3(0, 0, 10.879657693412984)),                       // N4
 		VertexFormat(glm::vec3(0, 0, 10.34969979193097)),                        // O4
 		VertexFormat(glm::vec3(0.2904485217423565, 0, 9.945922343182769)),       // P4
 		VertexFormat(glm::vec3(0.7951703326776086, 0, 9.76926970935543)),        // Q4
@@ -357,7 +345,7 @@ void CarRace::CreateRaceTrack(
 		VertexFormat(glm::vec3(-26.86151653041573, 0, 3.5838976192010548)),      // B14
 		VertexFormat(glm::vec3(-27.37697574556036, 0, 4.393904957285473))        // C14
 	};
-//
+
 	std::vector<VertexFormat> trackVertices;
 	std::vector<GLuint> trackIndices;
 	glm::vec3 d, p, p1, p2;
@@ -367,114 +355,87 @@ void CarRace::CreateRaceTrack(
 		p1 = backboneVertices[i].position;
 		p2 = backboneVertices[i + 1].position;
 		d = p2 - p1;
-		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
-
+		p = glm::cross(d, glm::vec3(0, 1, 0));
+		
 		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
 		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-
+		
 		trackIndices.emplace_back(currIndice++);
 		trackIndices.emplace_back(currIndice++);
 	}
-
+		
 	p1 = backboneVertices[NO_VERTICES - 1].position;
 	p2 = backboneVertices[0].position;
 	d = p2 - p1;
 	p = glm::cross(d, glm::vec3(0, 1, 0));
-
+		
 	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
 	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-
+		
 	trackIndices.emplace_back(currIndice++);
 	trackIndices.emplace_back(currIndice++);
-
+		
 	trackIndices.emplace_back(0);
-	trackIndices.emplace_back(1);
-
+		
 	/*CreateMesh(name, trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
-
+		
 	meshes[name] = new Mesh(name);
 	meshes[name]->InitFromData(trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);
 }
 
-void CarRace::Init()
+void Objects::CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices)
 {
-	/*Objects objects;
-	objects.CreateRaceTrack("raceTrack", glm::vec3(1, 0, 0));*/
+	GLuint VAO = 0;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
 
-	CreateRaceTrack("raceTrack", glm::vec3(1, 0, 0));
-}
+	GLuint VBO = 0;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
-void CarRace::FrameStart()
-{
-	// Clears the color buffer (using the previously set color) and depth buffer
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GLuint IBO = 0;
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
-	glm::ivec2 resolution = window->GetResolution();
+	// ========================================================================
+	// This section demonstrates how the GPU vertex shader program
+	// receives data. It will be learned later, when GLSL shaders will be
+	// introduced. For the moment, just think that each property value from
+	// our vertex format needs to be sent to a certain channel, in order to
+	// know how to receive it in the GLSL vertex shader.
 
-	// Sets the screen area where to draw
-	glViewport(0, 0, resolution.x, resolution.y);
-}
+	// Set vertex position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
 
-void CarRace::Update(float deltaTimeSeconds)
-{
-	/*glLineWidth(3);
-	glPointSize(5);
-	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);*/
+	// Set vertex normal attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
 
-	RenderMesh(meshes["raceTrack"], shaders["VertexColor"], glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
-}
+	// Set texture coordinate attribute
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
 
-void CarRace::FrameEnd()
-{
-	DrawCoordinateSystem();
-}
+	// Set vertex color attribute
+	glEnableVertexAttribArray(3);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
+	// ========================================================================
 
-void CarRace::OnInputUpdate(float deltaTime, int mods)
-{
+	// Unbind the VAO
+	glBindVertexArray(0);
 
-}
+	// Check for OpenGL errors
+	if (GetOpenGLError() == GL_INVALID_OPERATION)
+	{
+		std::cout << "\t[NOTE] : For students : DON'T PANIC! This error should go away when completing the tasks." << std::endl;
+		std::cout << "\t[NOTE] : For developers : This happens because OpenGL core spec >=3.1 forbids null VAOs." << std::endl;
+	}
 
-
-void CarRace::OnKeyPress(int key, int mods)
-{
-
-}
-
-
-void CarRace::OnKeyRelease(int key, int mods)
-{
-	// Add key release event
-}
-
-
-void CarRace::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
-{
-	
-}
-
-
-void CarRace::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
-{
-	// Add mouse button press event
-}
-
-
-void CarRace::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
-{
-	// Add mouse button release event
-}
-
-
-void CarRace::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)
-{
-
-}
-
-
-void CarRace::OnWindowResize(int width, int height)
-{
-
+	// Mesh information is saved into a Mesh object
+	meshes[name] = new Mesh(name);
+	meshes[name]->InitFromBuffer(VAO, static_cast<unsigned int>(indices.size()));
 }
