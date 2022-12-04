@@ -5,10 +5,12 @@
 #include "components/simple_scene.h"
 #include "components/text_renderer.h"
 
-//#include "lab_m1/2-car-race/Objects.hpp"
+#include "lab_m1/2-car-race/Objects.hpp"
 
-#define NO_VERTICES         333
-#define DIST_TO_BACKBONE    0.9f
+//#define NO_VERTICES         333
+//#define DIST_TO_BACKBONE    0.9f
+
+#define GRASS_SIZE		50
 
 namespace m1
 {
@@ -34,11 +36,7 @@ namespace m1
 		void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		void OnWindowResize(int width, int height) override;
 
-		void CreateRaceTrack(const std::string& name, glm::vec3 color);
-		void CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices);
-
 	protected:
-		GLenum polygonMode;
 
 	};
 }	// namespace m1

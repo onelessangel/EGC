@@ -1,11 +1,8 @@
 #include "lab_m1/2-car-race/Objects.hpp"
 
-using namespace objects;
-
-void Objects::CreateRaceTrack(
+Mesh* objects::CreateRaceTrack(
 	const std::string &name,
-	glm::vec3 color,
-	bool fill)
+	glm::vec3 color)
 {
 	std::vector<VertexFormat> backboneVertices =
 	{
@@ -36,7 +33,7 @@ void Objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-20.443603032985003, 0, 9.247341928730892)),      // A1
 		VertexFormat(glm::vec3(-19.76684079764371, 0, 8.80943695292182)),        // B1
 		VertexFormat(glm::vec3(-19.010459475791674, 0, 8.65019877990034)),       // C1
-		VertexFormat(glm::vec3(5.538776992961004, 0, 9.990319293141454)),        // D
+		//VertexFormat(glm::vec3((-18.17125, 0, 8.79462))),					     // D1
 		VertexFormat(glm::vec3(-17.378268202321497, 0, 9.287151471986261)),      // E1
 		VertexFormat(glm::vec3(-16.86074414000168, 0, 10.362009139881255)),      // F1
 		VertexFormat(glm::vec3(-16.64296823513535, 0, 11.23296296106766)),       // G1
@@ -118,7 +115,7 @@ void Objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(0.18950415955530608, 0, 12.671420122233126)),     // K4
 		VertexFormat(glm::vec3(0, 0, 12)),                                       // L4
 		VertexFormat(glm::vec3(-0.0880928364590826, 0, 11.460087775988523)),     // M4
-		VertexFormat(glm::vec3(0, 0, 10.879657693412984)),                       // N4
+		VertexFormat(glm::vec3(-0.18581, 0, 10.96135)),							 // N4
 		VertexFormat(glm::vec3(0, 0, 10.34969979193097)),                        // O4
 		VertexFormat(glm::vec3(0.2904485217423565, 0, 9.945922343182769)),       // P4
 		VertexFormat(glm::vec3(0.7951703326776086, 0, 9.76926970935543)),        // Q4
@@ -311,7 +308,7 @@ void Objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-10.919099376299675, 0, -8.345301359860379)),     // P12
 		VertexFormat(glm::vec3(-11.360921560709357, 0, -8.823942059637536)),     // Q12
 		VertexFormat(glm::vec3(-11.839562260486513, 0, -9.413038305517112)),     // R12
-		VertexFormat(glm::vec3(-12, 0, -10)),                                    // S12
+		VertexFormat(glm::vec3(-12.20608, 0, -9.87497)),                         // S12
 		VertexFormat(glm::vec3(-12.649569598570933, 0, -10.554412281908792)),    // T12
 		VertexFormat(glm::vec3(-13.275484359817982, 0, -11.03305298168595)),     // U12
 		VertexFormat(glm::vec3(-13.827762090330086, 0, -11.548512196830579)),    // V12
@@ -345,17 +342,17 @@ void Objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-26.86151653041573, 0, 3.5838976192010548)),      // B14
 		VertexFormat(glm::vec3(-27.37697574556036, 0, 4.393904957285473))        // C14
 	};
-
+		
 	std::vector<VertexFormat> trackVertices;
 	std::vector<GLuint> trackIndices;
 	glm::vec3 d, p, p1, p2;
 	GLuint currIndice = 0;
-
+		
 	for (int i = 0; i < NO_VERTICES - 1; i++) {
 		p1 = backboneVertices[i].position;
 		p2 = backboneVertices[i + 1].position;
 		d = p2 - p1;
-		p = glm::cross(d, glm::vec3(0, 1, 0));
+		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
 		
 		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
 		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
@@ -376,66 +373,99 @@ void Objects::CreateRaceTrack(
 	trackIndices.emplace_back(currIndice++);
 		
 	trackIndices.emplace_back(0);
+	trackIndices.emplace_back(1);
 		
 	/*CreateMesh(name, trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
 		
-	meshes[name] = new Mesh(name);
+	/*meshes[name] = new Mesh(name);
 	meshes[name]->InitFromData(trackVertices, trackIndices);
-	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);
+	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
+
+	Mesh* track = new Mesh(name);
+	track->InitFromData(trackVertices, trackIndices);
+	track->SetDrawMode(GL_TRIANGLE_STRIP);
+
+	return track;
 }
 
-void Objects::CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices)
+Mesh* objects::CreateGrass(
+	const std::string& name,
+	glm::vec3 leftBottomCorner,
+	float length,
+	glm::vec3 color)
 {
-	GLuint VAO = 0;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	glm::vec3 corner = leftBottomCorner;
 
-	GLuint VBO = 0;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-	GLuint IBO = 0;
-	glGenBuffers(1, &IBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
-
-	// ========================================================================
-	// This section demonstrates how the GPU vertex shader program
-	// receives data. It will be learned later, when GLSL shaders will be
-	// introduced. For the moment, just think that each property value from
-	// our vertex format needs to be sent to a certain channel, in order to
-	// know how to receive it in the GLSL vertex shader.
-
-	// Set vertex position attribute
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
-
-	// Set vertex normal attribute
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
-
-	// Set texture coordinate attribute
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
-
-	// Set vertex color attribute
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
-	// ========================================================================
-
-	// Unbind the VAO
-	glBindVertexArray(0);
-
-	// Check for OpenGL errors
-	if (GetOpenGLError() == GL_INVALID_OPERATION)
+	std::vector<VertexFormat> vertices =
 	{
-		std::cout << "\t[NOTE] : For students : DON'T PANIC! This error should go away when completing the tasks." << std::endl;
-		std::cout << "\t[NOTE] : For developers : This happens because OpenGL core spec >=3.1 forbids null VAOs." << std::endl;
-	}
+		VertexFormat(corner, color),
+		VertexFormat(corner + glm::vec3(length, 0, 0), color),
+		VertexFormat(corner + glm::vec3(length, 0, length), color),
+		VertexFormat(corner + glm::vec3(0, 0, length), color)
+	};
 
-	// Mesh information is saved into a Mesh object
-	meshes[name] = new Mesh(name);
-	meshes[name]->InitFromBuffer(VAO, static_cast<unsigned int>(indices.size()));
+	Mesh* grass = new Mesh(name);
+	std::vector<unsigned int> indices = { 0, 1, 2, 3 };
+
+	indices.push_back(0);
+	indices.push_back(2);
+
+	grass->InitFromData(vertices, indices);
+	return grass;
 }
+
+//void objects::CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices)
+//{
+//	GLuint VAO = 0;
+//	glGenVertexArrays(1, &VAO);
+//	glBindVertexArray(VAO);
+//
+//	GLuint VBO = 0;
+//	glGenBuffers(1, &VBO);
+//	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+//
+//	GLuint IBO = 0;
+//	glGenBuffers(1, &IBO);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
+//
+//	// ========================================================================
+//	// This section demonstrates how the GPU vertex shader program
+//	// receives data. It will be learned later, when GLSL shaders will be
+//	// introduced. For the moment, just think that each property value from
+//	// our vertex format needs to be sent to a certain channel, in order to
+//	// know how to receive it in the GLSL vertex shader.
+//
+//	// Set vertex position attribute
+//	glEnableVertexAttribArray(0);
+//	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), 0);
+//
+//	// Set vertex normal attribute
+//	glEnableVertexAttribArray(1);
+//	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(sizeof(glm::vec3)));
+//
+//	// Set texture coordinate attribute
+//	glEnableVertexAttribArray(2);
+//	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3)));
+//
+//	// Set vertex color attribute
+//	glEnableVertexAttribArray(3);
+//	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(VertexFormat), (void*)(2 * sizeof(glm::vec3) + sizeof(glm::vec2)));
+//	// ========================================================================
+//
+//	// Unbind the VAO
+//	glBindVertexArray(0);
+//
+//	// Check for OpenGL errors
+//	if (GetOpenGLError() == GL_INVALID_OPERATION)
+//	{
+//		std::cout << "\t[NOTE] : For students : DON'T PANIC! This error should go away when completing the tasks." << std::endl;
+//		std::cout << "\t[NOTE] : For developers : This happens because OpenGL core spec >=3.1 forbids null VAOs." << std::endl;
+//	}
+//
+//	// Mesh information is saved into a Mesh object
+//	meshes[name] = new Mesh(name);
+//	meshes[name]->InitFromBuffer(VAO, static_cast<unsigned int>(indices.size()));
+//}
