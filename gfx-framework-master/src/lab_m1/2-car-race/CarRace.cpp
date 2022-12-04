@@ -17,11 +17,14 @@ CarRace::~CarRace()
 
 void CarRace::Init()
 {
-	Mesh *raceTrack = CreateRaceTrack("raceTrack", glm::vec3(0.3113208, 0.1450872, 0.1450872));
+	Mesh *raceTrack = CreateRaceTrack("raceTrack", RACE_TRACK_COLOR);
 	AddMeshToList(raceTrack);
 
-	Mesh* grass = CreateGrass("grass", glm::vec3(-GRASS_SIZE / 2, 0, -GRASS_SIZE / 2), GRASS_SIZE, glm::vec3(0, 1, 0));
-	AddMeshToList(grass);
+	Mesh* skySide = CreateSky("sky_side", glm::vec3(0, 0, 0), SKY_LENGTH, SKY_HEIGHT, SKY_LIGHT_BLUE, SKY_DARK_BLUE);
+	AddMeshToList(skySide);
+
+	Mesh* skyTop = CreateSky("sky_top", glm::vec3(0, 0, 0), SKY_LENGTH, SKY_LENGTH, SKY_DARK_BLUE, SKY_DARK_BLUE);
+	AddMeshToList(skyTop);
 
 	Mesh* lightTree = new Mesh("light_tree");
 	lightTree->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/trees/light_tree"), "light_tree.fbx");
@@ -51,6 +54,22 @@ void CarRace::Init()
 	grass2->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "vegetation/grass/grass2"), "grass2.fbx");
 	AddMeshToList(grass2);
 
+	Mesh* player = new Mesh("player");
+	player->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "characters/race_cars/player"), "player.fbx");
+	AddMeshToList(player);
+
+	Mesh* obstacle1 = new Mesh("obstacle1");
+	obstacle1->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "characters/race_cars/obstacle1"), "obstacle1.fbx");
+	AddMeshToList(obstacle1);
+
+	Mesh* obstacle2 = new Mesh("obstacle2");
+	obstacle2->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "characters/race_cars/obstacle2"), "obstacle2.fbx");
+	AddMeshToList(obstacle2);
+
+	Mesh* obstacle3 = new Mesh("obstacle3");
+	obstacle3->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "characters/race_cars/obstacle3"), "obstacle3.fbx");
+	AddMeshToList(obstacle3);
+
 }
 
 void CarRace::FrameStart()
@@ -67,19 +86,64 @@ void CarRace::FrameStart()
 
 void CarRace::Update(float deltaTimeSeconds)
 {
-	/*glLineWidth(3);
-	glPointSize(5);
-	glPolygonMode(GL_FRONT_AND_BACK, polygonMode);*/
-
-	RenderMesh(meshes["raceTrack"], shaders["VertexColor"], glm::vec3(0, .01, 0), glm::vec3(.8, .8, .8));
-	//RenderMesh(meshes["grass"], shaders["VertexColor"], glm::vec3(0, 0, 0));
-	RenderMesh(meshes["light_tree"], glm::vec3(0, 2, 0), glm::vec3(.01, .01, .01));
-	RenderMesh(meshes["dark_tree"], glm::vec3(1, 2, 0), glm::vec3(.01, .01, .01));
-	RenderMesh(meshes["orange_tree"], glm::vec3(0, 2, 1), glm::vec3(.01, .01, .01));
-	RenderMesh(meshes["yellow_tree"], glm::vec3(2, 2, 2), glm::vec3(.01, .01, .01));
-	RenderMesh(meshes["green_forest"], glm::vec3(10, 0, 0), glm::vec3(.01, .01, .01));
-	RenderMesh(meshes["autumn_forest"], glm::vec3(0, 2, 10), glm::vec3(.01, .01, .01));
 	RenderMesh(meshes["grass2"], glm::vec3(0, 0, 0));
+
+	{
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, 0, -SKY_LENGTH / 2);
+		RenderMesh(meshes["sky_side"], shaders["VertexColor"], modelMatrix);
+
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, SKY_HEIGHT, -SKY_LENGTH / 2);
+		RenderMesh(meshes["sky_top"], shaders["VertexColor"], modelMatrix);
+	}
+	
+
+	{
+		modelMatrix  = transform3D::Translate(SKY_LENGTH / 2, 0, -SKY_LENGTH / 2);
+		modelMatrix *= transform3D::RotateOY(-M_PI_2);
+		RenderMesh(meshes["sky_side"], shaders["VertexColor"], modelMatrix);
+
+		modelMatrix = transform3D::Translate(SKY_LENGTH / 2, SKY_HEIGHT, -SKY_LENGTH / 2);
+		modelMatrix *= transform3D::RotateOY(-M_PI_2);
+		RenderMesh(meshes["sky_top"], shaders["VertexColor"], modelMatrix);
+	}
+
+	{
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, 0, SKY_LENGTH / 2);
+		RenderMesh(meshes["sky_side"], shaders["VertexColor"], modelMatrix);
+
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, SKY_HEIGHT, SKY_LENGTH / 2);
+		RenderMesh(meshes["sky_top"], shaders["VertexColor"], modelMatrix);
+	}
+
+	{
+		modelMatrix  = transform3D::Translate(-SKY_LENGTH / 2, 0, SKY_LENGTH / 2);
+		modelMatrix *= transform3D::RotateOY(M_PI_2);
+		RenderMesh(meshes["sky_side"], shaders["VertexColor"], modelMatrix);
+
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, SKY_HEIGHT, SKY_LENGTH / 2);
+		modelMatrix *= transform3D::RotateOY(M_PI_2);
+		RenderMesh(meshes["sky_top"], shaders["VertexColor"], modelMatrix);
+	}
+
+	{
+		modelMatrix = transform3D::Translate(-SKY_LENGTH / 2, SKY_HEIGHT + SKY_LENGTH, -SKY_LENGTH / 2);
+		modelMatrix *= transform3D::RotateOX(M_PI_2);
+		RenderMesh(meshes["sky_top"], shaders["VertexColor"], modelMatrix);
+	}
+	
+	RenderMesh(meshes["raceTrack"], shaders["VertexColor"], glm::vec3(0, .01, 0), glm::vec3(.8, .8, .8));
+
+	RenderMesh(meshes["light_tree"], glm::vec3(0, 2, 0), SCALE_TREE);
+	RenderMesh(meshes["dark_tree"], glm::vec3(1, 2, 0), SCALE_TREE);
+	RenderMesh(meshes["orange_tree"], glm::vec3(0, 2, 1), SCALE_TREE);
+	RenderMesh(meshes["yellow_tree"], glm::vec3(2, 2, 2), SCALE_TREE);
+	RenderMesh(meshes["green_forest"], glm::vec3(10, 0, 0), SCALE_TREE);
+	RenderMesh(meshes["autumn_forest"], glm::vec3(0, 2, 10), SCALE_TREE);
+	RenderMesh(meshes["player"], glm::vec3(-5, .5, 0), SCALE_CAR);
+	RenderMesh(meshes["obstacle1"], glm::vec3(-4, .5, 0), SCALE_CAR);
+	RenderMesh(meshes["obstacle2"], glm::vec3(-3, .5, 0), SCALE_CAR);
+	RenderMesh(meshes["obstacle3"], glm::vec3(-2, .5, 0), SCALE_CAR);
+
 }
 
 void CarRace::FrameEnd()

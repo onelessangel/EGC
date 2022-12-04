@@ -389,30 +389,32 @@ Mesh* objects::CreateRaceTrack(
 	return track;
 }
 
-Mesh* objects::CreateGrass(
+Mesh* objects::CreateSky(
 	const std::string& name,
 	glm::vec3 leftBottomCorner,
 	float length,
-	glm::vec3 color)
+	float height,
+	glm::vec3 colorBottom,
+	glm::vec3 colorTop)
 {
 	glm::vec3 corner = leftBottomCorner;
 
 	std::vector<VertexFormat> vertices =
 	{
-		VertexFormat(corner, color),
-		VertexFormat(corner + glm::vec3(length, 0, 0), color),
-		VertexFormat(corner + glm::vec3(length, 0, length), color),
-		VertexFormat(corner + glm::vec3(0, 0, length), color)
+		VertexFormat(corner, colorBottom),
+		VertexFormat(corner + glm::vec3(length, 0, 0), colorBottom),
+		VertexFormat(corner + glm::vec3(length, height, 0), colorTop),
+		VertexFormat(corner + glm::vec3(0, height, 0), colorTop)
 	};
 
-	Mesh* grass = new Mesh(name);
+	Mesh* sky = new Mesh(name);
 	std::vector<unsigned int> indices = { 0, 1, 2, 3 };
 
 	indices.push_back(0);
 	indices.push_back(2);
 
-	grass->InitFromData(vertices, indices);
-	return grass;
+	sky->InitFromData(vertices, indices);
+	return sky;
 }
 
 //void objects::CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices)

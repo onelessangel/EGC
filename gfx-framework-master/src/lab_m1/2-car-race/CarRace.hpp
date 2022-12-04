@@ -6,11 +6,7 @@
 #include "components/text_renderer.h"
 
 #include "lab_m1/2-car-race/Objects.hpp"
-
-//#define NO_VERTICES         333
-//#define DIST_TO_BACKBONE    0.9f
-
-#define GRASS_SIZE		50
+#include "lab_m1/2-car-race/Transform3D.hpp"
 
 namespace m1
 {
@@ -37,6 +33,6 @@ namespace m1
 		void OnWindowResize(int width, int height) override;
 
 	protected:
-
+		glm::mat4 modelMatrix;
 	};
 }	// namespace m1
