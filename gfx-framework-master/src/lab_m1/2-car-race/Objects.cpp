@@ -13,7 +13,7 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-26.886028471140012, 0, 10.634007276389962)),     // D
 		VertexFormat(glm::vec3(-26.540634301549638, 0, 12.499135792177979)),     // E
 		VertexFormat(glm::vec3(-26.126161298041204, 0, 13.897164754800947)),     // F
-		VertexFormat(glm::vec3(-25.459605483161646, 0, 15.059535244014931)),     // G
+		//VertexFormat(glm::vec3(-25.459605483161646, 0, 15.059535244014931)),     // G
 		VertexFormat(glm::vec3(-24.743033704564983, 0, 15.855726109122333)),     // H
 		VertexFormat(glm::vec3(-24.02646192596832, 0, 16.333440628186775)),      // I
 		VertexFormat(glm::vec3(-23.071032887839433, 0, 16.691726517485108)),     // J
@@ -35,11 +35,11 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-19.010459475791674, 0, 8.65019877990034)),       // C1
 		//VertexFormat(glm::vec3((-18.17125, 0, 8.79462))),					     // D1
 		VertexFormat(glm::vec3(-17.378268202321497, 0, 9.287151471986261)),      // E1
-		VertexFormat(glm::vec3(-16.86074414000168, 0, 10.362009139881255)),      // F1
-		VertexFormat(glm::vec3(-16.64296823513535, 0, 11.23296296106766)),       // G1
+		//VertexFormat(glm::vec3(-16.86074414000168, 0, 10.362009139881255)),      // F1
+		//VertexFormat(glm::vec3(-16.64296823513535, 0, 11.23296296106766)),       // G1
 		VertexFormat(glm::vec3(-16.415843420214486, 0, 11.91433740583025)),      // H1
 		VertexFormat(glm::vec3(-16.390607329667723, 0, 12.570475760046076)),     // I1
-		VertexFormat(glm::vec3(-16.3401351485742, 0, 13.277086295355428)),       // J1
+		//VertexFormat(glm::vec3(-16.3401351485742, 0, 13.277086295355428)),       // J1
 		VertexFormat(glm::vec3(-16.36537123912096, 0, 14.463182551053269)),      // K1
 		VertexFormat(glm::vec3(-15.784941156545422, 0, 15.144556995815858)),     // L1
 		VertexFormat(glm::vec3(-15.154038892876356, 0, 15.497862263470534)),     // M1
@@ -110,9 +110,9 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(0.8456425137711339, 0, 15.094084814722333)),      // F4
 		VertexFormat(glm::vec3(0.8456425137711339, 0, 14.513654732146794)),      // G4
 		VertexFormat(glm::vec3(0.769934242130846, 0, 14.008932921211542)),       // H4
-		VertexFormat(glm::vec3(0.5680455177567452, 0, 13.504211110276291)),      // I4
-		VertexFormat(glm::vec3(0.3409207028358817, 0, 13.150905842621615)),      // J4
-		VertexFormat(glm::vec3(0.18950415955530608, 0, 12.671420122233126)),     // K4
+		//VertexFormat(glm::vec3(0.5680455177567452, 0, 13.504211110276291)),      // I4
+		//VertexFormat(glm::vec3(0.3409207028358817, 0, 13.150905842621615)),      // J4
+		//VertexFormat(glm::vec3(0.18950415955530608, 0, 12.671420122233126)),     // K4
 		VertexFormat(glm::vec3(0, 0, 12)),                                       // L4
 		VertexFormat(glm::vec3(-0.0880928364590826, 0, 11.460087775988523)),     // M4
 		VertexFormat(glm::vec3(-0.18581, 0, 10.96135)),							 // N4
@@ -145,25 +145,25 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(10.424073382394914, 0, 15.146627878595481)),      // Q5
 		VertexFormat(glm::vec3(10.348502162805092, 0, 14.642819747996667)),      // R5
 		VertexFormat(glm::vec3(10, 0, 14)),                                      // S5
-		VertexFormat(glm::vec3(9.743932406086513, 0, 13.584822673739154)),       // T5
-		VertexFormat(glm::vec3(9.441647527727225, 0, 13.206966575790041)),       // U5
-		VertexFormat(glm::vec3(9.114172242837995, 0, 12.803920071310989)),       // V5
-		VertexFormat(glm::vec3(8.736316144888882, 0, 12.451254379891818)),       // W5
-		VertexFormat(glm::vec3(8, 0, 12)),                                       // Z5
-		VertexFormat(glm::vec3(7.577557444511607, 0, 11.594780557873833)),       // A6
-		VertexFormat(glm::vec3(7.199701346562494, 0, 11.317686086044484)),       // B6
-		VertexFormat(glm::vec3(6.821845248613383, 0, 10.91463958156543)),        // C6
-		VertexFormat(glm::vec3(6.318037118014567, 0, 10.561973890146259)),       // D6
-		VertexFormat(glm::vec3(5.62336, 0, 10.03566)),                           // M
-		VertexFormat(glm::vec3(5.02332, 0, 9.47486)),                            // E6
-		VertexFormat(glm::vec3(4.58149559340669, 0, 8.996219378219669)),         // F6
-		VertexFormat(glm::vec3(3.9923993475271136, 0, 8.480760163075038)),       // G6
-		VertexFormat(glm::vec3(3.5137586477499574, 0, 8.075756494032829)),       // H6
-		VertexFormat(glm::vec3(2.94562, 0, 7.45139)),                            // I6
-		VertexFormat(glm::vec3(2.463904918933628, 0, 6.758222504125202)),        // N6
-		VertexFormat(glm::vec3(2, 0, 6)),                                        // O6
-		VertexFormat(glm::vec3(1.7837639426252272, 0, 5.448321364568281)),       // P6
-		VertexFormat(glm::vec3(1.481479064265938, 0, 4.969703640499406)),        // Q6
+		//VertexFormat(glm::vec3(9.743932406086513, 0, 13.584822673739154)),       // T5
+		//VertexFormat(glm::vec3(9.441647527727225, 0, 13.206966575790041)),       // U5
+		//VertexFormat(glm::vec3(9.114172242837995, 0, 12.803920071310989)),       // V5
+		//VertexFormat(glm::vec3(8.736316144888882, 0, 12.451254379891818)),       // W5
+		//VertexFormat(glm::vec3(8, 0, 12)),                                       // Z5
+		//VertexFormat(glm::vec3(7.577557444511607, 0, 11.594780557873833)),       // A6
+		//VertexFormat(glm::vec3(7.199701346562494, 0, 11.317686086044484)),       // B6
+		//VertexFormat(glm::vec3(6.821845248613383, 0, 10.91463958156543)),        // C6
+		//VertexFormat(glm::vec3(6.318037118014567, 0, 10.561973890146259)),       // D6
+		//VertexFormat(glm::vec3(5.62336, 0, 10.03566)),                           // M
+		//VertexFormat(glm::vec3(5.02332, 0, 9.47486)),                            // E6
+		//VertexFormat(glm::vec3(4.58149559340669, 0, 8.996219378219669)),         // F6
+		//VertexFormat(glm::vec3(3.9923993475271136, 0, 8.480760163075038)),       // G6
+		//VertexFormat(glm::vec3(3.5137586477499574, 0, 8.075756494032829)),       // H6
+		//VertexFormat(glm::vec3(2.94562, 0, 7.45139)),                            // I6
+		//VertexFormat(glm::vec3(2.463904918933628, 0, 6.758222504125202)),        // N6
+		//VertexFormat(glm::vec3(2, 0, 6)),                                        // O6
+		//VertexFormat(glm::vec3(1.7837639426252272, 0, 5.448321364568281)),       // P6
+		//VertexFormat(glm::vec3(1.481479064265938, 0, 4.969703640499406)),        // Q6
 		VertexFormat(glm::vec3(1.3807174381461749, 0, 4.44070510337065)),        // R6
 		VertexFormat(glm::vec3(1.3051462185563525, 0, 3.886516159711953)),       // S6
 		VertexFormat(glm::vec3(1.3051462185563525, 0, 3.3323272160532555)),      // T6
@@ -298,24 +298,25 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-5.480000515195627, 0, -6.936156362614344)),      // F12
 		VertexFormat(glm::vec3(-5.948599801690744, 0, -6.393920045384281)),      // G12
 		VertexFormat(glm::vec3(-6.4272405014679, 0, -6.025734891709545)),        // H12
-		VertexFormat(glm::vec3(-7.089973778082424, 0, -5.841642314872177)),      // I12
+		//VertexFormat(glm::vec3(-7.089973778082424, 0, -5.841642314872177)),      // I12
 		VertexFormat(glm::vec3(-7.679070023962002, 0, -5.915279345607125)),      // J12
 		VertexFormat(glm::vec3(-8.19452923910663, 0, -6.320283014649334)),       // K12
 		VertexFormat(glm::vec3(-8.746806969618735, 0, -6.68846816832407)),       // L12
 		VertexFormat(glm::vec3(-9.33590321549831, 0, -7.167108868101225)),       // M12
-		VertexFormat(glm::vec3(-9.888180946010415, 0, -7.535294021775961)),      // N12
-		VertexFormat(glm::vec3(-10.36682164578757, 0, -7.903479175450697)),      // O12
-		VertexFormat(glm::vec3(-10.919099376299675, 0, -8.345301359860379)),     // P12
-		VertexFormat(glm::vec3(-11.360921560709357, 0, -8.823942059637536)),     // Q12
-		VertexFormat(glm::vec3(-11.839562260486513, 0, -9.413038305517112)),     // R12
-		VertexFormat(glm::vec3(-12.20608, 0, -9.87497)),                         // S12
+		//VertexFormat(glm::vec3(-9.888180946010415, 0, -7.535294021775961)),      // N12
+		//VertexFormat(glm::vec3(-10.36682164578757, 0, -7.903479175450697)),      // O12
+		//VertexFormat(glm::vec3(-10.919099376299675, 0, -8.345301359860379)),     // P12
+		//VertexFormat(glm::vec3(-11.360921560709357, 0, -8.823942059637536)),     // Q12
+		//VertexFormat(glm::vec3(-11.839562260486513, 0, -9.413038305517112)),     // R12
+		//VertexFormat(glm::vec3(-12.20608, 0, -9.87497)),                         // S12
 		VertexFormat(glm::vec3(-12.649569598570933, 0, -10.554412281908792)),    // T12
 		VertexFormat(glm::vec3(-13.275484359817982, 0, -11.03305298168595)),     // U12
 		VertexFormat(glm::vec3(-13.827762090330086, 0, -11.548512196830579)),    // V12
 		VertexFormat(glm::vec3(-14.343221305474716, 0, -11.990334381240261)),    // W12
 		VertexFormat(glm::vec3(-14.89549903598682, 0, -12.542612111752366)),     // Z12
-		VertexFormat(glm::vec3(-15.631869343336291, 0, -12.837160234692153)),    // A13
-		VertexFormat(glm::vec3(-16.589150742890602, 0, -12.837160234692153)),    // B13
+		//VertexFormat(glm::vec3(-15.631869343336291, 0, -12.837160234692153)),    // A13
+		//VertexFormat(glm::vec3((-16.0502, 0, -12.44442))),
+		//VertexFormat(glm::vec3(-16.589150742890602, 0, -12.837160234692153)),    // B13
 		VertexFormat(glm::vec3(-17.251884019505127, 0, -12.248063988812577)),    // C13
 		VertexFormat(glm::vec3(-17.767343234649758, 0, -11.511693681463106)),    // D13
 		VertexFormat(glm::vec3(-18.172346903691967, 0, -10.664867828011213)),    // E13
@@ -330,7 +331,7 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-18, 0, -2)),                                     // N13
 		VertexFormat(glm::vec3(-18.5405320573667, 0, -1.4234204707753506)),      // O13
 		VertexFormat(glm::vec3(-19.313720880083647, 0, -0.9447797709981942)),    // P13
-		VertexFormat(glm::vec3(-20.123728218168065, 0, -0.539776101955985)),     // ${1
+		VertexFormat(glm::vec3(-20.123728218168065, 0, -0.539776101955985)),     // Q13
 		VertexFormat(glm::vec3(-20.860098525517536, 0, -0.28204649438367013)),   // R13
 		VertexFormat(glm::vec3(-21.670105863601954, 0, 0)),                      // S13
 		VertexFormat(glm::vec3(-22.66420577852374, 0, 0.30704975149590685)),     // T13
@@ -341,39 +342,107 @@ Mesh* objects::CreateRaceTrack(
 		VertexFormat(glm::vec3(-26.456512861373522, 0, 2.7738902811166364)),     // A14
 		VertexFormat(glm::vec3(-26.86151653041573, 0, 3.5838976192010548)),      // B14
 		VertexFormat(glm::vec3(-27.37697574556036, 0, 4.393904957285473))        // C14
+		//VertexFormat(glm::vec3((-27.37195, 0, 5.2759)))							 // J6
 	};
-		
+
+	std::vector<VertexFormat> backboneVerticesComplex;
 	std::vector<VertexFormat> trackVertices;
 	std::vector<GLuint> trackIndices;
-	glm::vec3 d, p, p1, p2;
+	glm::vec3 d, p, p1, p2, newPosition;
 	GLuint currIndice = 0;
-		
-	for (int i = 0; i < NO_VERTICES - 1; i++) {
+	
+	for (int i = 0; i < backboneVertices.size() - 1; i++) {
 		p1 = backboneVertices[i].position;
 		p2 = backboneVertices[i + 1].position;
+		backboneVerticesComplex.push_back(backboneVertices[i]);
+
+		for (float j = STEP; j <= MAX_STEP; j += STEP) {
+			newPosition = glm::mix(p1, p2, j);
+			backboneVerticesComplex.push_back(VertexFormat(newPosition));
+			//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
+		}
+		//backboneVerticesComplex.push_back(backboneVertices[i + 1]);
+	}
+
+	p1 = backboneVertices[backboneVertices.size() - 1].position;
+	p2 = backboneVertices[0].position;
+
+	backboneVerticesComplex.push_back(backboneVertices[backboneVertices.size() - 1]);
+	
+	for (float j = STEP; j <= MAX_STEP; j += STEP) {
+		newPosition = glm::mix(p1, p2, j);
+		backboneVerticesComplex.push_back(VertexFormat(newPosition));
+		//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
+	}
+
+	/*p1 = backboneVertices[0].position;
+	p2 = backboneVertices[1].position;*/
+
+	/*std::cout << p1.x << " " << p1.y << " " << p1.z << "\n";
+	std::cout << p2.x << " " << p2.y << " " << p2.z << "\n";
+	std::cout << "\n\n";*/
+
+	/*for (float i = .01f; i <= .99f; i += .01f) {
+		glm::vec3 newPosition = glm::mix(p1, p2, i);
+		std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
+	}*/
+		
+	//for (int i = 0; i < backboneVertices.size() - 1; i++) {
+	//	p1 = backboneVertices[i].position;
+	//	p2 = backboneVertices[i + 1].position;
+	//	d = p2 - p1;
+	//	p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
+	//	
+	//	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
+	//	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
+	//	
+	//	trackIndices.emplace_back(currIndice++);
+	//	trackIndices.emplace_back(currIndice++);
+	//}
+	//	
+	//p1 = backboneVertices[backboneVertices.size() - 1].position;
+	//p2 = backboneVertices[0].position;
+	//d = p2 - p1;
+	//p = glm::cross(d, glm::vec3(0, 1, 0));
+	//	
+	//trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
+	//trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
+	//	
+	//trackIndices.emplace_back(currIndice++);
+	//trackIndices.emplace_back(currIndice++);
+	//	
+	//trackIndices.emplace_back(0);
+	//trackIndices.emplace_back(1);
+
+	for (int i = 0; i < backboneVerticesComplex.size() - 1; i++) {
+		p1 = backboneVerticesComplex[i].position;
+		p2 = backboneVerticesComplex[i + 1].position;
 		d = p2 - p1;
 		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
-		
+			
 		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
 		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-		
+			
 		trackIndices.emplace_back(currIndice++);
 		trackIndices.emplace_back(currIndice++);
 	}
-		
-	p1 = backboneVertices[NO_VERTICES - 1].position;
-	p2 = backboneVertices[0].position;
+			
+	p1 = backboneVerticesComplex[backboneVerticesComplex.size() - 1].position;
+	p2 = backboneVerticesComplex[0].position;
 	d = p2 - p1;
 	p = glm::cross(d, glm::vec3(0, 1, 0));
-		
+			
 	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
 	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-		
+			
 	trackIndices.emplace_back(currIndice++);
-	trackIndices.emplace_back(currIndice++);
-		
+	trackIndices.emplace_back(currIndice);
+			
+	//trackIndices.emplace_back(currIndice);
 	trackIndices.emplace_back(0);
 	trackIndices.emplace_back(1);
+	//trackIndices.emplace_back(1);
+	//trackIndices.emplace_back(3);
 		
 	/*CreateMesh(name, trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/

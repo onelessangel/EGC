@@ -32,7 +32,15 @@ namespace m1
 		void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		void OnWindowResize(int width, int height) override;
 
+		void CreateObjects();
+		void RenderGrass();
+		void RenderSky();
+		void RenderTrees();
+		void RenderEnvironment();
+		void RenderPlayer();
+
 	protected:
 		glm::mat4 modelMatrix;
+		glm::mat4 playerPosition;
 	};
 }	// namespace m1

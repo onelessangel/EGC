@@ -12,13 +12,16 @@
 #include "utils/gl_utils.h"
 #include "components/simple_scene.h"
 
-#define NO_VERTICES         333
+//#define NO_VERTICES         333
 #define DIST_TO_BACKBONE    1.0f
+
+#define STEP                .0005f
+#define MAX_STEP            .9999f
 
 #define SKY_LENGTH	    	50
 #define SKY_HEIGHT	    	18
 
-#define SCALE_TREE          glm::vec3(.01, .01, .01)
+#define SCALE_TREE          glm::vec3(.008, .008, .008)
 #define SCALE_CAR           glm::vec3(.005, .005, .005)
 
 // ------------- COLORS -------------
