@@ -15,8 +15,8 @@
 //#define NO_VERTICES         333
 #define DIST_TO_BACKBONE    1.0f
 
-#define STEP                .0005f
-#define MAX_STEP            .9999f
+#define STEP                .01f
+#define MAX_STEP            .99f
 
 #define SKY_LENGTH	    	50
 #define SKY_HEIGHT	    	18
