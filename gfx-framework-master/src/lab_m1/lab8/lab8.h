@@ -3,6 +3,8 @@
 #include "components/simple_scene.h"
 #include "components/transform.h"
 
+#define ANGLE_SPEEDUP		50.0f
+#define NO_LIGHT_SOURCES    3
 
 namespace m1
 {
@@ -30,13 +32,15 @@ namespace m1
         void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
         void OnWindowResize(int width, int height) override;
 
-        glm::vec3 lightPosition;
+        glm::vec3 lightPosition[NO_LIGHT_SOURCES];
         glm::vec3 lightDirection;
         unsigned int materialShininess;
         float materialKd;
         float materialKs;
 
         // TODO(student): If you need any other class variables, define them here.
-
+        GLint typeOfLight;
+        GLfloat angleOX, angleOY;
+        GLfloat cutoffAngle;
     };
 }   // namespace m1
