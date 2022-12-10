@@ -361,7 +361,7 @@ Mesh* objects::CreateRaceTrack(
 			backboneVerticesComplex.push_back(VertexFormat(newPosition));
 			//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
 		}
-		//backboneVerticesComplex.push_back(backboneVertices[i + 1]);
+		
 	}
 
 	p1 = backboneVertices[backboneVertices.size() - 1].position;
