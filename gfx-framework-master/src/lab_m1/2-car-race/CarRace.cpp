@@ -19,39 +19,32 @@ CarRace::~CarRace()
 void CarRace::Init()
 {
 	renderCameraTarget = false;
-	freezeMovement = false;
+	onTrack = true;
 
 	// set initial position and angle
 	playerCenter = glm::vec3(-26.8, .15, 5);
 	playerAngle = -M_PI_2 + .1;
-	
-	// set player framing corners
-	/*fc = new FramingCorners();
-	ComputeFramingCorners();*/
 
 	camera = new camera_implementation::Camera();
-	camera->Set(playerCenter + CAMERA_OFFSET, playerCenter - glm::vec3(0, -.15, 0), glm::vec3(0, 1, 0));
+	//camera->Set(playerCenter + CAMERA_OFFSET, playerCenter - glm::vec3(0, -.15, 0), glm::vec3(0, 1, 0));
+	//camera->Set(glm::vec3(- 17, 4, 4), glm::vec3(-21, 1, 5), glm::vec3(0, 1, 0));
+	camera->Set(glm::vec3(0, 8, 3.5f), glm::vec3(0, 3, 0), glm::vec3(0, 1, 0));
 
 	playerPosition = glm::vec3(camera->GetTargetPosition().x, playerCenter.y, camera->GetTargetPosition().z);
 
-	// After you implement the changing of the projection
-	// parameters, remove hardcodings of these parameters
 	fov = RADIANS(60);
 	width = 0;
 
 	projectionMatrix = glm::perspective(fov, window->props.aspectRatio, 0.01f, 200.0f);
 
 	CreateObjects();
-	DivideRaceTrackVertices();
 
-	/*cout << meshes["raceTrack"]->vertices.size() / 2 << "\n";
-	cout << innerVertices.size() << "\n";
-	cout << outerVertices.size() << "\n";*/
+	obstaclePosIdx1 = obstaclePath2.size() - 1 - START_POS_1;
+	obstaclePosIdx2 = obstaclePath2.size() - 1 - START_POS_2;
+	obstaclePosIdx3 = obstaclePath2.size() - 1 - START_POS_3;
 }
 
-Mesh* CarRace::CreateRaceTrack(
-	const std::string& name,
-	glm::vec3 color)
+void CarRace::CreateVertexPaths(glm::vec3 color)
 {
 	std::vector<VertexFormat> backboneVertices =
 	{
@@ -391,124 +384,122 @@ Mesh* CarRace::CreateRaceTrack(
 		VertexFormat(glm::vec3(-26.456512861373522, 0, 2.7738902811166364)),     // A14
 		VertexFormat(glm::vec3(-26.86151653041573, 0, 3.5838976192010548)),      // B14
 		VertexFormat(glm::vec3(-27.37697574556036, 0, 4.393904957285473))        // C14
-		//VertexFormat(glm::vec3((-27.37195, 0, 5.2759)))							 // J6
+		//VertexFormat(glm::vec3((-27.37195, 0, 5.2759)))						 // J6
 	};
 
-	std::vector<VertexFormat> backboneVerticesComplex;
-	std::vector<VertexFormat> trackVertices;
-	std::vector<GLuint> trackIndices;
+	std::vector<VertexFormat> backboneVertices_MediumStep, backboneVertices_SmallStep;
 	glm::vec3 d, p, p1, p2, newPosition;
 	GLuint currIndice = 0;
 
+
+	// create complex backboneVertices vectors
 	for (int i = 0; i < backboneVertices.size() - 1; i++) {
 		p1 = backboneVertices[i].position;
 		p2 = backboneVertices[i + 1].position;
-		backboneVerticesComplex.push_back(backboneVertices[i]);
 
-		for (float j = STEP; j <= MAX_STEP; j += STEP) {
+		backboneVertices_MediumStep.push_back(backboneVertices[i]);
+		backboneVertices_SmallStep.push_back(backboneVertices[i]);
+
+		for (float j = STEP_MEDIUM; j <= MAX_STEP_MEDIUM; j += STEP_MEDIUM) {
 			newPosition = glm::mix(p1, p2, j);
-			backboneVerticesComplex.push_back(VertexFormat(newPosition));
-			//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
+			backboneVertices_MediumStep.push_back(VertexFormat(newPosition));
 		}
 
+		for (float j = STEP_SMALL; j <= MAX_STEP_SMALL; j += STEP_SMALL) {
+			newPosition = glm::mix(p1, p2, j);
+			backboneVertices_SmallStep.push_back(VertexFormat(newPosition));
+		}
 	}
 
 	p1 = backboneVertices[backboneVertices.size() - 1].position;
 	p2 = backboneVertices[0].position;
 
-	backboneVerticesComplex.push_back(backboneVertices[backboneVertices.size() - 1]);
+	backboneVertices_MediumStep.push_back(backboneVertices[backboneVertices.size() - 1]);
+	backboneVertices_SmallStep.push_back(backboneVertices[backboneVertices.size() - 1]);
 
-	for (float j = STEP; j <= MAX_STEP; j += STEP) {
+	for (float j = STEP_MEDIUM; j <= MAX_STEP_MEDIUM; j += STEP_MEDIUM) {
 		newPosition = glm::mix(p1, p2, j);
-		backboneVerticesComplex.push_back(VertexFormat(newPosition));
-		//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
+		backboneVertices_MediumStep.push_back(VertexFormat(newPosition));
 	}
 
-	/*p1 = backboneVertices[0].position;
-	p2 = backboneVertices[1].position;*/
+	for (float j = STEP_SMALL; j <= MAX_STEP_SMALL; j += STEP_SMALL) {
+		newPosition = glm::mix(p1, p2, j);
+		backboneVertices_SmallStep.push_back(VertexFormat(newPosition));
+	}
 
-	/*std::cout << p1.x << " " << p1.y << " " << p1.z << "\n";
-	std::cout << p2.x << " " << p2.y << " " << p2.z << "\n";
-	std::cout << "\n\n";*/
 
-	/*for (float i = .01f; i <= .99f; i += .01f) {
-		glm::vec3 newPosition = glm::mix(p1, p2, i);
-		std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
-	}*/
-
-	//for (int i = 0; i < backboneVertices.size() - 1; i++) {
-	//	p1 = backboneVertices[i].position;
-	//	p2 = backboneVertices[i + 1].position;
-	//	d = p2 - p1;
-	//	p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
-	//	
-	//	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
-	//	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-	//	
-	//	trackIndices.emplace_back(currIndice++);
-	//	trackIndices.emplace_back(currIndice++);
-	//}
-	//	
-	//p1 = backboneVertices[backboneVertices.size() - 1].position;
-	//p2 = backboneVertices[0].position;
-	//d = p2 - p1;
-	//p = glm::cross(d, glm::vec3(0, 1, 0));
-	//	
-	//trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
-	//trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-	//	
-	//trackIndices.emplace_back(currIndice++);
-	//trackIndices.emplace_back(currIndice++);
-	//	
-	//trackIndices.emplace_back(0);
-	//trackIndices.emplace_back(1);
-
-	for (int i = 0; i < backboneVerticesComplex.size() - 1; i++) {
-		p1 = backboneVerticesComplex[i].position;
-		p2 = backboneVerticesComplex[i + 1].position;
+	// create paths for obstacles
+	for (int i = 0; i < backboneVertices_SmallStep.size() - 1; i++) {
+		p1 = backboneVertices_SmallStep[i].position;
+		p2 = backboneVertices_SmallStep[i + 1].position;
 		d = p2 - p1;
 		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
 
-		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
+		// obstacle1 path
+		obstaclePath1.emplace_back(p1 + p * DIST_PATH_1 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+
+		// obstacle2 path
+		obstaclePath2.emplace_back(p1 + p * DIST_PATH_2 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+
+		// obstacle3 path
+		obstaclePath3.emplace_back(p1 + p * DIST_PATH_3 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+	}
+
+	p1 = backboneVertices_SmallStep[backboneVertices_SmallStep.size() - 1].position;
+	p2 = backboneVertices_SmallStep[0].position;
+	d = p2 - p1;
+	p = glm::cross(d, glm::vec3(0, 1, 0));
+
+	// obstacle1 path
+	obstaclePath1.emplace_back(p1 + p * DIST_PATH_1 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+
+	// obstacle2 path
+	obstaclePath2.emplace_back(p1 + p * DIST_PATH_2 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+
+	// obstacle3 path
+	obstaclePath3.emplace_back(p1 + p * DIST_PATH_3 + glm::vec3(0, OBSTACLE_COORD_Y, 0));
+
+
+	// create inner/outer track vertices and main track vertices and indices vectors
+	for (int i = 0; i < backboneVertices_MediumStep.size() - 1; i++) {
+		p1 = backboneVertices_MediumStep[i].position;
+		p2 = backboneVertices_MediumStep[i + 1].position;
+		d = p2 - p1;
+		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
+
+		// interior vertex
+		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
 		trackInnerVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
-		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
+
+		// exterior vertex
+		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
 		trackOuterVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
 
 		trackIndices.emplace_back(currIndice++);
 		trackIndices.emplace_back(currIndice++);
 	}
 
-	p1 = backboneVerticesComplex[backboneVerticesComplex.size() - 1].position;
-	p2 = backboneVerticesComplex[0].position;
+	p1 = backboneVertices_MediumStep[backboneVertices_MediumStep.size() - 1].position;
+	p2 = backboneVertices_MediumStep[0].position;
 	d = p2 - p1;
 	p = glm::cross(d, glm::vec3(0, 1, 0));
 
-	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex
+	// interior vertex
+	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
 	trackInnerVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
-	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
+
+	// exterior vertex
+	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
 	trackOuterVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
 
 	trackIndices.emplace_back(currIndice++);
 	trackIndices.emplace_back(currIndice);
 
-	//trackIndices.emplace_back(currIndice);
 	trackIndices.emplace_back(0);
 	trackIndices.emplace_back(1);
-	//trackIndices.emplace_back(1);
-	//trackIndices.emplace_back(3);
 
 	/*CreateMesh(name, trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
-
-	/*meshes[name] = new Mesh(name);
-	meshes[name]->InitFromData(trackVertices, trackIndices);
-	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
-
-	Mesh* track = new Mesh(name);
-	track->InitFromData(trackVertices, trackIndices);
-	track->SetDrawMode(GL_TRIANGLE_STRIP);
-
-	return track;
 }
 
 Mesh* CarRace::CreateSky(
@@ -542,7 +533,10 @@ Mesh* CarRace::CreateSky(
 
 void CarRace::CreateObjects()
 {
-	Mesh* raceTrack = CreateRaceTrack("raceTrack", RACE_TRACK_COLOR);
+	CreateVertexPaths(RACE_TRACK_COLOR);
+	Mesh* raceTrack = new Mesh("raceTrack");
+	raceTrack->InitFromData(trackVertices, trackIndices);
+	raceTrack->SetDrawMode(GL_TRIANGLE_STRIP);
 	AddMeshToList(raceTrack);
 
 	Mesh* skySide = CreateSky("sky_side", glm::vec3(0, 0, 0), SKY_LENGTH, SKY_HEIGHT, SKY_LIGHT_BLUE, SKY_DARK_BLUE);
@@ -626,7 +620,6 @@ void CarRace::RenderRaceTrack()
 {
 	modelMatrix = glm::mat4(1);
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(0, .01, 0));
-	//modelMatrix = glm::scale(modelMatrix, glm::vec3(.8, .8, .8));
 	RenderMesh(meshes["raceTrack"], shaders["VertexColor"], modelMatrix);
 }
 
@@ -676,14 +669,20 @@ void CarRace::RenderSky()
 
 void CarRace::RenderTrees()
 {
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(17.5, -.89, -2));
+	/*modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(23, -.89, -3));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	modelMatrix *= RotateOY(3 * M_PI_4);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(13, -.89, -2));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(19.5, -.89, -4.5));
+	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+	modelMatrix *= RotateOY(3 * M_PI_4 - .3);
+	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(14.5, -.89, -2));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	modelMatrix *= RotateOY(3 * M_PI_4);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
@@ -696,42 +695,53 @@ void CarRace::RenderTrees()
 	modelMatrix = glm::mat4(1);
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(18, .24, -4.5));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-	RenderMesh(meshes["light_tree"], shaders["Simple"], modelMatrix);
+	RenderMesh(meshes["light_tree"], shaders["Simple"], modelMatrix);*/
 
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(17, .24, -4.8));
-	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-	RenderMesh(meshes["light_tree"], shaders["Simple"], modelMatrix);
+	//modelMatrix = glm::mat4(1);
+	//modelMatrix = glm::translate(modelMatrix, glm::vec3(17, .24, -4.8));
+	//modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+	//RenderMesh(meshes["light_tree"], shaders["Simple"], modelMatrix);
 
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(16, .24, -4.7));
+	/*modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(20, -.89, 2));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-	RenderMesh(meshes["dark_tree"], shaders["Simple"], modelMatrix);
-
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(15, -.89, 1));
-	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-	modelMatrix *= RotateOY(M_PI_2);
+	modelMatrix *= RotateOY(3 * M_PI_4);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(18, -.89, 6));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(17, -.89, 1));
+	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+	modelMatrix *= RotateOY(3 * M_PI_4);
+	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(20.8, -.89, 6.5));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	modelMatrix *= RotateOY(.6);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(18, -.89, 11.7));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(17.3, .24, 5));
+	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+	RenderMesh(meshes["dark_tree"], shaders["Simple"], modelMatrix);
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(21.5, -.89, 11.7));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(18, -.89, 11));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(25, -.89, 12));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-	modelMatrix *= RotateOY(-3.5);
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
 
 	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(21.2, -.89, 14.7));
+	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+	modelMatrix *= RotateOY(M_PI_2 - .5);
+	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);*/
+
+	/*modelMatrix = glm::mat4(1);
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(18, -.89, 11));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	modelMatrix *= RotateOY(-3.5);
@@ -866,7 +876,7 @@ void CarRace::RenderTrees()
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(-17.5, -.89, 9));
 	modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
 	modelMatrix *= RotateOY(-M_PI_4 + .8);
-	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);
+	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix);*/
 
 	// ------ EXTERIOR TRACK ------
 
@@ -886,12 +896,82 @@ void CarRace::RenderTrees()
 	RenderMesh(meshes["green_forest"], shaders["Simple"], modelMatrix)*/;
 }
 
+void CarRace::RenderObstacles()
+{
+	// obstacle1
+	obstaclePosition1 = obstaclePath1[obstaclePosIdx1];
+	obstaclePosIdx1 = (obstaclePosIdx1 + OBSTACLE_SPEED_1) % obstaclePath1.size();
+	currPathPoint = obstaclePosition1;
+	nextPathPoint = obstaclePath1[obstaclePosIdx1];
+
+	if (nextPathPoint.z > currPathPoint.z) {
+		dir = glm::normalize(nextPathPoint - currPathPoint);
+		angle = glm::angle(AXIS_OX, dir);
+	}
+	else {
+		dir = glm::normalize(currPathPoint - nextPathPoint);
+		angle = glm::angle(AXIS_OX, dir) + M_PI;
+	}
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, obstaclePosition1);
+	modelMatrix = glm::scale(modelMatrix, SCALE_CAR);
+	modelMatrix *= RotateOY(angle);
+	RenderMesh(meshes["obstacle1"], shaders["Simple"], modelMatrix);
+
+
+	// obstacle2
+	obstaclePosition2 = obstaclePath2[obstaclePosIdx2];
+	obstaclePosIdx2 = (obstaclePosIdx2 + OBSTACLE_SPEED_2) % obstaclePath2.size();
+	currPathPoint = obstaclePosition2;
+	nextPathPoint = obstaclePath2[obstaclePosIdx2];
+
+	if (nextPathPoint.z > currPathPoint.z) {
+		dir = glm::normalize(nextPathPoint - currPathPoint);
+		angle = glm::angle(AXIS_OX, dir);
+	}
+	else {
+		dir = glm::normalize(currPathPoint - nextPathPoint);
+		angle = glm::angle(AXIS_OX, dir) + M_PI;
+	}
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, obstaclePosition2);
+	modelMatrix = glm::scale(modelMatrix, SCALE_CAR);
+	modelMatrix *= RotateOY(angle);
+	RenderMesh(meshes["obstacle2"], shaders["Simple"], modelMatrix);
+
+
+	// obstacle3
+	obstaclePosition3 = obstaclePath3[obstaclePosIdx3];
+	obstaclePosIdx3 = (obstaclePosIdx3 + OBSTACLE_SPEED_3) % obstaclePath3.size();
+	currPathPoint = obstaclePosition3;
+	nextPathPoint = obstaclePath3[obstaclePosIdx3];
+
+	if (nextPathPoint.z > currPathPoint.z) {
+		dir = glm::normalize(nextPathPoint - currPathPoint);
+		angle = glm::angle(AXIS_OX, dir);
+	}
+	else {
+		dir = glm::normalize(currPathPoint - nextPathPoint);
+		angle = glm::angle(AXIS_OX, dir) + M_PI;
+	}
+
+	modelMatrix = glm::mat4(1);
+	modelMatrix = glm::translate(modelMatrix, obstaclePosition3);
+	modelMatrix = glm::scale(modelMatrix, SCALE_CAR);
+	modelMatrix *= RotateOY(angle);
+	RenderMesh(meshes["obstacle3"], shaders["Simple"], modelMatrix);
+}
+
 void CarRace::RenderEnvironment()
 {
 	RenderGrass();
 	//RenderSky();
 	RenderTrees();
-	RenderRaceTrack();	
+	RenderRaceTrack();
+
+	RenderObstacles();
 }
 
 void CarRace::RenderPlayer()
@@ -903,68 +983,11 @@ void CarRace::RenderPlayer()
 	RenderMesh(meshes["player"], shaders["Simple"], modelMatrix);
 }
 
-//void CarRace::ComputeFramingCorners()
-//{
-////	//fc->frontLeft = glm::vec3(playerCenter.x, playerCenter.y, playerCenter.z);
-////	 fc->frontLeft = glm::vec3(playerPosition.x - .257, playerPosition.y, playerPosition.z - .39);
-////	//cout << playerPosition.x << "\n";
-//	//fc->frontLeft = glm::vec3(playerPosition.x, playerPosition.y + .2 , playerPosition.z);
-////	fc->frontRight = glm::vec3(playerCenter.x + .2055, playerCenter.y, playerCenter.z - .194);
-////	fc->backLeft = glm::vec3(playerCenter.x - .145, playerCenter.y, playerCenter.z + .677);
-////	fc->backRight = glm::vec3(playerCenter.x + .284, playerCenter.y, playerCenter.z + .63);
-//}
-
-void CarRace::DivideRaceTrackVertices()
-{
-	vector<VertexFormat> raceTrackVertices = meshes["raceTrack"]->vertices;
-
-	for (int i = 0; i < raceTrackVertices.size(); i += 2) {
-		innerVertices.emplace_back(raceTrackVertices[i]);
-	}
-
-	for (int i = 1; i < raceTrackVertices.size(); i += 2) {
-		outerVertices.emplace_back(raceTrackVertices[i]);
-	}
-
-	//cout << innerVertices.size() << " " << outerVertices.size() << "\n";
-}
-
-//float CarRace::Magnitude(glm::vec3 p1, glm::vec3 p2)
-//{
-//	glm::vec3 vector;
-//
-//	vector.x = p2.x - p1.x;
-//	//vector.y = p2.y - p1.y;
-//	vector.z = p2.z - p1.z;
-//
-//	return (float)sqrt(vector.x * vector.x + vector.z * vector.z);
-//}
-//
-//float CarRace::DistanceToLine(glm::vec3 p, glm::vec3 p1, glm::vec3 p2)
-//{
-//	float lineMag, u;
-//	glm::vec3 intersection;
-//
-//	lineMag = Magnitude(p1, p2);
-//
-//	u = (((p.x - p1.x) * (p2.x - p1.x)) +
-//		((p.z - p1.z) * (p2.z - p1.z))) /
-//		(lineMag * lineMag);
-//
-//	//if (u < 0.0f || u > 1.0f)
-//	//	return 0;   // closest point does not fall within the line segment
-//
-//	intersection.x = p1.x + u * (p2.x - p1.x);
-//	//intersection.y = p1.y + u * (p2.y - p1.y);
-//	intersection.z = p1.z + u * (p2.z - p1.z);
-//
-//	return Magnitude(p, intersection);
-//}
-
 bool CarRace::SameSide(glm::vec3 p1, glm::vec3 p2, glm::vec3 a, glm::vec3 b)
 {
 	glm::vec3 cp1 = glm::cross(b - a, p1 - a);
 	glm::vec3 cp2 = glm::cross(b - a, p2 - a);
+
 	if (glm::dot(cp1, cp2) >= 0) {
 		return true;
 	}
@@ -981,200 +1004,51 @@ bool CarRace::PointInTriangle(glm::vec3 p, glm::vec3 a, glm::vec3 b, glm::vec3 c
 	return false;
 }
 
-bool CarRace::PlayerIsOnTrack()
+bool CarRace::PlayerIsOnTrack(glm::vec3 playerPos)
 {
-	//glm::vec3 p1, p2;
-	//bool isOnTrack = true;
-	////bool isOnTrack = false;
-
-	//for (int i = 0; i < vertices.size() - 1; i++) {
-	//	p1 = vertices[i].position;
-	//	p2 = vertices[i + 1].position;
-
-	//	if (DistanceToLine(playerPosition, p1, p2) <= .005) {
-	//		isOnTrack = false;
-	//		//isOnTrack = true;
-	//		break;
-	//	}
-	//}
-
-	//p1 = vertices[vertices.size() - 1].position;
-	//p2 = vertices[0].position;
-
-
-
-
-
-	/*if (DistanceToLine(playerPosition, p1, p2) <= .0001f) {
-		isOnTrack = false;
-	}*/
-
-	//if (DistanceToLine(playerPosition, p1, p2) <= .05) {
-	//	isOnTrack = false;
-	//	//isOnTrack = true;
-	//}
-
-	// **********************
-
-	bool isOnTrack = false;
 	glm::vec3 in1, in2, out1, out2;
-	glm::vec3 pos = glm::vec3(playerPosition.x, 0, playerPosition.z);
+	glm::vec3 pos = glm::vec3(playerPos.x, 0, playerPos.z);
 
-	for (int i = 0; i < innerVertices.size() - 1; i++) {
-		in1 = innerVertices[i].position;
-		//in1 = glm::vec3(in1.x, 0, in1.z);
-
-		in2 = innerVertices[i + 1].position;
-		//in2 = glm::vec3(in2.x, 0, in2.z);
-
-		out1 = outerVertices[i].position;
-		//out1 = glm::vec3(out1.x, 0, out1.z);
-
-		out2 = outerVertices[i + 1].position;
-		//out2 = glm::vec3(out2.x, 0, out2.z);
+	for (int i = 0; i < meshes["raceTrack"]->vertices.size() / 2 - 1; i++) {
+		in1 = trackInnerVertices[i].position;
+		in2 = trackInnerVertices[i + 1].position;
+		out1 = trackOuterVertices[i].position;
+		out2 = trackOuterVertices[i + 1].position;
 
 		if (PointInTriangle(pos, in1, in2, out1) ||
 			PointInTriangle(pos, in2, out1, out2)) {
-		/*if (PointInTriangle(pos, out1, out2, in1) ||
-			PointInTriangle(pos, in1, in2, out2)) {*/
-			isOnTrack = true;
-			return isOnTrack;
+			return true;
 		}
 	}
 
-	in1 = innerVertices[innerVertices.size() - 1].position;
-	//in1 = glm::vec3(in1.x, 0, in1.z);
-
-	in2 = innerVertices[0].position;
-	//in2 = glm::vec3(in2.x, 0, in2.z);
-
-	out1 = outerVertices[outerVertices.size() - 1].position;
-	//out1 = glm::vec3(out1.x, 0, out1.z);
-
-	out2 = outerVertices[0].position;
-	//out2 = glm::vec3(out2.x, 0, out2.z);
+	in1 = trackInnerVertices[trackInnerVertices.size() - 1].position;
+	in2 = trackInnerVertices[0].position;
+	out1 = trackOuterVertices[trackOuterVertices.size() - 1].position;
+	out2 = trackOuterVertices[0].position;
 
 	if (PointInTriangle(pos, in1, in2, out1) ||
 		PointInTriangle(pos, in2, out1, out2)) {
-	/*if (PointInTriangle(pos, out1, out2, in1) ||
-		PointInTriangle(pos, in1, in2, out2)) {*/
-		isOnTrack = true;
-	}
-
-	// ************************
-
-	/*int num_vertices = meshes["raceTrack"]->vertices.size() / 2;
-
-	for (int i = 0; i < num_vertices; i++) {
-		if (PointInTriangle(glm::vec3(camera->GetTargetPosition().x, 0, camera->GetTargetPosition().z),
-			trackInnerVertices[i].position,
-			trackOuterVertices[(i + 1) % num_vertices].position,
-			trackInnerVertices[i].position)) {
-			return true;
-		}
-
-		if (PointInTriangle(glm::vec3(camera->GetTargetPosition().x, 0, camera->GetTargetPosition().z),
-			trackInnerVertices[i].position,
-			trackInnerVertices[(i + 1) % num_vertices].position,
-			trackOuterVertices[(i + 1) % num_vertices].position)) {
-			return true;
-		}
-	}
-
-	return false;*/
-	
-
-	return isOnTrack;
-}
-
-float CarRace::TriangleArea(glm::vec3 a, glm::vec3 b, glm::vec3 c)
-{
-	glm::vec3 ab = b - a;
-	glm::vec3 ac = c - a;
-	glm::vec3 crossProd = glm::cross(ab, ac);
-	float module = sqrt(crossProd.x * crossProd.x + crossProd.y * crossProd.y + crossProd.z * crossProd.z);
-
-	return module / 2;
-}
-
-bool CarRace::InsideTriangle(glm::vec3 p, glm::vec3 a, glm::vec3 b, glm::vec3 c)
-{
-	float triangleArea = TriangleArea(a, b, c);
-	float areaSum = 0;
-
-	areaSum += TriangleArea(a, b, p);
-	areaSum += TriangleArea(a, c, p);
-	areaSum += TriangleArea(b, c, p);
-
-	if (triangleArea >= areaSum - EPS && triangleArea <= areaSum + EPS) {
 		return true;
 	}
 
 	return false;
 }
 
-//bool CarRace::PlayerIsOnTrack()
-//{
-//	glm::vec3 in1, in2, out1, out2;
-//	glm::vec3 pos = glm::vec3(camera->GetTargetPosition().x, 0, camera->GetTargetPosition().z);
-//
-//	for (int i = 0; i < meshes["raceTrack"]->vertices.size() / 2 - 1; i++) {
-//		/*in1 = trackInnerVertices[i].position;
-//		in2 = trackInnerVertices[i + 1].position;
-//		out1 = trackOuterVertices[i].position;
-//		out2 = trackOuterVertices[i + 1].position;*/
-//		in1 = innerVertices[i].position;
-//		in2 = innerVertices[i + 1].position;
-//		out1 = outerVertices[i].position;
-//		out2 = outerVertices[i + 1].position;
-//
-//		if (InsideTriangle(pos, in1, in2, out1) || InsideTriangle(pos, out1, out2, in2)) {
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
+bool CarRace::CollidesObstacle(glm::vec3 obstaclePosition)
+{
+	auto distance = sqrt(
+		(playerPosition.x - obstaclePosition.x) * (playerPosition.x - obstaclePosition.x) +
+		(playerPosition.y - obstaclePosition.y) * (playerPosition.y - obstaclePosition.y) +
+		(playerPosition.z - obstaclePosition.z) * (playerPosition.z - obstaclePosition.z)
+	);
+
+	return distance < 2 * CAR_RADIUS;
+}
 
 void CarRace::Update(float deltaTimeSeconds)
 {
 	RenderEnvironment();
 	RenderPlayer();
-	//ComputeFramingCorners();
-	// PlayerIsOnTrack();
-
-	//cout << PlayerIsOnTrack(innerVertices) << "\n";
-	//cout << PlayerIsOnTrack(outerVertices) << "\n";
-
-	cout << PlayerIsOnTrack() << "\n";
-
-	//cout << meshes["raceTrack"]->vertices.size() << "\n";
-
-	//modelMatrix = glm::mat4(1);
-	//modelMatrix = glm::translate(modelMatrix, fc->frontLeft);
-	//modelMatrix = glm::scale(modelMatrix, glm::vec3(.009, .009, .009));
-	////modelMatrix *= RotateOY(playerAngle);
-	//RenderMesh(meshes["box"], shaders["VertexColor"], modelMatrix);
-
-	/*modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, fc->frontLeft);
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.5, .5, .5));
-	RenderMesh(meshes["box"], shaders["VertexColor"], modelMatrix);
-
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, fc->frontRight);
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.009, .009, .009));
-	RenderMesh(meshes["box"], shaders["VertexColor"], modelMatrix);
-
-	modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, fc->backLeft);
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.009, .009, .009));
-	RenderMesh(meshes["box"], shaders["VertexColor"], modelMatrix);*/
-
-	/*modelMatrix = glm::mat4(1);
-	modelMatrix = glm::translate(modelMatrix, fc->backRight);
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(.009, .009, .009));
-	RenderMesh(meshes["box"], shaders["VertexColor"], modelMatrix);*/
 
 	// Render the camera target. This is useful for understanding where
 	// the rotation point is, when moving in third-person camera mode.
@@ -1244,34 +1118,38 @@ void CarRace::OnInputUpdate(float deltaTime, int mods)
 		}
 	}
 	else {
-		/*if (window->KeyHold(GLFW_KEY_W) || window->KeyHold(GLFW_KEY_S))
-		{
-			if (!PlayerIsOnTrack(innerVertices) || !PlayerIsOnTrack(outerVertices)) {
-				freezeMovement = true;
+		if (CollidesObstacle(obstaclePosition1) ||
+			CollidesObstacle(obstaclePosition2) ||
+			CollidesObstacle(obstaclePosition3)) {
+			return;
+		}
+
+		if (window->KeyHold(GLFW_KEY_W)) {
+			oldCameraPos = camera->position;
+			oldPlayerPos = playerPosition;
+
+			//camera->MoveForward(deltaTime * MOVE_SPEED);
+			playerPosition.z = camera->GetTargetPosition().z;
+			playerPosition.x = camera->GetTargetPosition().x;
+
+			if (!PlayerIsOnTrack(playerPosition)) {
+				camera->position = oldCameraPos;
+				playerPosition = oldPlayerPos;
 			}
 		}
 
-		if ((window->KeyHold(GLFW_KEY_A) || window->KeyHold(GLFW_KEY_D) && freezeMovement)) {
-			freezeMovement = false;
-		}*/
-
-		
-		if (window->KeyHold(GLFW_KEY_W)) {
-			camera->MoveForward(deltaTime * MOVE_SPEED);
-			playerPosition.z = camera->GetTargetPosition().z;
-			playerPosition.x = camera->GetTargetPosition().x;
-			//cout << PlayerIsOnTrack() << "\n";
-
-		}
-		/*else {
-			cout << PlayerIsOnTrack(innerVertices) << " " << PlayerIsOnTrack(outerVertices) << "\n";
-		}*/
-		
 		if (window->KeyHold(GLFW_KEY_S)) {
-			camera->MoveForward(-deltaTime * MOVE_SPEED);
+			oldCameraPos = camera->position;
+			oldPlayerPos = playerPosition;
+
+			//camera->MoveForward(-deltaTime * MOVE_SPEED);
 			playerPosition.z = camera->GetTargetPosition().z;
 			playerPosition.x = camera->GetTargetPosition().x;
-			//cout << PlayerIsOnTrack() << "\n";
+
+			if (!PlayerIsOnTrack(playerPosition)) {
+				camera->position = oldCameraPos;
+				playerPosition = oldPlayerPos;
+			}
 		}
 
 		if (window->KeyHold(GLFW_KEY_A)) {

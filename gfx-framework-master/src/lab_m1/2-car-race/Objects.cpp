@@ -1,7 +1,7 @@
 #include "lab_m1/2-car-race/Objects.hpp"
 
 Mesh* objects::CreateRaceTrack(
-	const std::string &name,
+	const std::string& name,
 	glm::vec3 color)
 {
 	std::vector<VertexFormat> backboneVertices =
@@ -350,7 +350,7 @@ Mesh* objects::CreateRaceTrack(
 	std::vector<GLuint> trackIndices;
 	glm::vec3 d, p, p1, p2, newPosition;
 	GLuint currIndice = 0;
-	
+
 	for (int i = 0; i < backboneVertices.size() - 1; i++) {
 		p1 = backboneVertices[i].position;
 		p2 = backboneVertices[i + 1].position;
@@ -361,92 +361,57 @@ Mesh* objects::CreateRaceTrack(
 			backboneVerticesComplex.push_back(VertexFormat(newPosition));
 			//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
 		}
-		
+
 	}
 
 	p1 = backboneVertices[backboneVertices.size() - 1].position;
 	p2 = backboneVertices[0].position;
 
 	backboneVerticesComplex.push_back(backboneVertices[backboneVertices.size() - 1]);
-	
+
 	for (float j = STEP; j <= MAX_STEP; j += STEP) {
 		newPosition = glm::mix(p1, p2, j);
 		backboneVerticesComplex.push_back(VertexFormat(newPosition));
 		//std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
 	}
 
-	/*p1 = backboneVertices[0].position;
-	p2 = backboneVertices[1].position;*/
-
-	/*std::cout << p1.x << " " << p1.y << " " << p1.z << "\n";
-	std::cout << p2.x << " " << p2.y << " " << p2.z << "\n";
-	std::cout << "\n\n";*/
-
-	/*for (float i = .01f; i <= .99f; i += .01f) {
-		glm::vec3 newPosition = glm::mix(p1, p2, i);
-		std::cout << newPosition.x << " " << newPosition.y << " " << newPosition.z << "\n";
-	}*/
-		
-	//for (int i = 0; i < backboneVertices.size() - 1; i++) {
-	//	p1 = backboneVertices[i].position;
-	//	p2 = backboneVertices[i + 1].position;
-	//	d = p2 - p1;
-	//	p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
-	//	
-	//	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
-	//	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-	//	
-	//	trackIndices.emplace_back(currIndice++);
-	//	trackIndices.emplace_back(currIndice++);
-	//}
-	//	
-	//p1 = backboneVertices[backboneVertices.size() - 1].position;
-	//p2 = backboneVertices[0].position;
-	//d = p2 - p1;
-	//p = glm::cross(d, glm::vec3(0, 1, 0));
-	//	
-	//trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
-	//trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-	//	
-	//trackIndices.emplace_back(currIndice++);
-	//trackIndices.emplace_back(currIndice++);
-	//	
-	//trackIndices.emplace_back(0);
-	//trackIndices.emplace_back(1);
-
 	for (int i = 0; i < backboneVerticesComplex.size() - 1; i++) {
 		p1 = backboneVerticesComplex[i].position;
 		p2 = backboneVerticesComplex[i + 1].position;
 		d = p2 - p1;
 		p = glm::normalize(glm::cross(d, glm::vec3(0, 1, 0)));
-			
+
 		trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
+		trackInnerVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
 		trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-			
+		trackOuterVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
+
 		trackIndices.emplace_back(currIndice++);
 		trackIndices.emplace_back(currIndice++);
 	}
-			
+
 	p1 = backboneVerticesComplex[backboneVerticesComplex.size() - 1].position;
 	p2 = backboneVerticesComplex[0].position;
 	d = p2 - p1;
 	p = glm::cross(d, glm::vec3(0, 1, 0));
-			
-	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex	
+
+	trackVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);	// interior vertex
+	trackInnerVertices.emplace_back(glm::vec3(p1 + p * DIST_TO_BACKBONE), color);
 	trackVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);	// exterior vertex
-			
+	trackOuterVertices.emplace_back(glm::vec3(p1 - p * DIST_TO_BACKBONE), color);
+
 	trackIndices.emplace_back(currIndice++);
 	trackIndices.emplace_back(currIndice);
-			
+
 	//trackIndices.emplace_back(currIndice);
 	trackIndices.emplace_back(0);
 	trackIndices.emplace_back(1);
 	//trackIndices.emplace_back(1);
 	//trackIndices.emplace_back(3);
-		
+
 	/*CreateMesh(name, trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/
-		
+
 	/*meshes[name] = new Mesh(name);
 	meshes[name]->InitFromData(trackVertices, trackIndices);
 	meshes[name]->SetDrawMode(GL_TRIANGLE_STRIP);*/

@@ -34,4 +34,6 @@ namespace objects
     Mesh* CreateRaceTrack(const std::string& name, glm::vec3 color);
     Mesh* CreateSky(const std::string& name, glm::vec3 leftBottomCorner, float length, float height, glm::vec3 colorBottom, glm::vec3 colorTop);
     //void CreateMesh(const std::string& name, const std::vector<VertexFormat>& vertices, const std::vector<unsigned int>& indices);
+    
+    std::vector<VertexFormat> trackInnerVertices, trackOuterVertices;
 }
