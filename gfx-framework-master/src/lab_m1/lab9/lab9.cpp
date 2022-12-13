@@ -43,6 +43,12 @@ void Lab9::Init()
 
     {
         Texture2D* texture = new Texture2D();
+        texture->Load2D(PATH_JOIN(sourceTextureDir, "nirvana.png").c_str(), GL_REPEAT);
+        mapTextures["nirvana"] = texture;
+    }
+
+    {
+        Texture2D* texture = new Texture2D();
         texture->Load2D(PATH_JOIN(sourceTextureDir, "earth.png").c_str(), GL_REPEAT);
         mapTextures["earth"] = texture;
     }
@@ -96,9 +102,11 @@ void Lab9::Init()
 
         vector<glm::vec2> textureCoords
         {
-            // TODO(student): Complete texture coordinates for the square
-            glm::vec2(0.0f, 0.0f)
-
+            // Complete texture coordinates for the square
+            glm::vec2(0.f, 0.f),
+            glm::vec2(0.f, 1.f),
+            glm::vec2(1.f, 1.f),
+            glm::vec2(1.f, 0.f)
         };
 
         vector<unsigned int> indices =
@@ -158,10 +166,13 @@ void Lab9::Update(float deltaTimeSeconds)
         modelMatrix = glm::translate(modelMatrix, glm::vec3(2, 0.5f, 0));
         modelMatrix = glm::rotate(modelMatrix, RADIANS(60.0f), glm::vec3(1, 0, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.75f));
-        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["crate"]);
+        //RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["crate"]);
+        mixTextures = true;
+        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["crate"], mapTextures["grass"]);
+        mixTextures = false;
     }
 
-    {
+    {   
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(-2, 0.5f, 0));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.75f));
@@ -169,10 +180,26 @@ void Lab9::Update(float deltaTimeSeconds)
         RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["random"]);
     }
 
+    /*{
+        glm::vec3 oY = glm::mat3(GetSceneCamera()->GetViewMatrix()) * glm::vec3(0.f, 0.f, 1.f);
+        GLfloat angle = acos(glm::dot(oY, glm::vec3(0.f, 0.f, 1.f)));
+        modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0.f, 1.f, 0.f));
+
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.5f, 0.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+        RenderSimpleMesh(meshes["box"], shaders["LabShader"], modelMatrix, mapTextures["bamboo"]);
+    }*/
+
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.5f, 0.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f));
+
+        glm::vec3 oY = glm::mat3(GetSceneCamera()->GetViewMatrix()) * glm::vec3(0.f, 0.f, 1.f);
+        GLfloat angle = acos(glm::dot(oY, glm::vec3(0.f, 0.f, 1.f)));
+        modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(0.f, 1.f, 0.f));
+
         RenderSimpleMesh(meshes["square"], shaders["LabShader"], modelMatrix, mapTextures["grass"]);
     }
 
@@ -214,23 +241,51 @@ void Lab9::RenderSimpleMesh(Mesh *mesh, Shader *shader, const glm::mat4 & modelM
     glUniformMatrix4fv(loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
 
     // TODO(student): Set any other shader uniforms that you need
+    GLint locTime = glGetUniformLocation(shader->program, "time");
+
+    GLboolean isQuad = false;
+
+    if (mesh == meshes["square"])
+    {
+        isQuad = true;
+    }
+
+    GLint locIsQuad = glGetUniformLocation(shader->program, "is_quad");
+    glUniform1i(locIsQuad, isQuad);
+
+    if (mesh == meshes["sphere"])
+    {
+        glUniform1f(locTime, (GLfloat)Engine::GetElapsedTime());
+    }
+    else
+    {
+        glUniform1f(locTime, -1.f);
+    }
+
+    glUniform1i(glGetUniformLocation(shader->program, "mix_textures"), mixTextures);
 
     if (texture1)
     {
-        // TODO(student): Do these:
-        // - activate texture location 0
-        // - bind the texture1 ID
-        // - send theuniform value
+        // Activate texture location 0
+        glActiveTexture(GL_TEXTURE0);
 
+        // Bind the texture1 ID
+        glBindTexture(GL_TEXTURE_2D, texture1->GetTextureID());
+
+        // Send texture uniform value
+        glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 0);
     }
 
     if (texture2)
     {
-        // TODO(student): Do these:
-        // - activate texture location 1
-        // - bind the texture2 ID
-        // - send the uniform value
+        // Activate texture location 1
+        glActiveTexture(GL_TEXTURE1);
 
+        // Bind the texture2 ID
+        glBindTexture(GL_TEXTURE_2D, texture2->GetTextureID());
+
+        // Send texture uniform value
+        glUniform1i(glGetUniformLocation(shader->program, "texture_2"), 1);
     }
 
     // Draw the object
@@ -247,13 +302,23 @@ Texture2D* Lab9::CreateRandomTexture(unsigned int width, unsigned int height)
     unsigned char* data = new unsigned char[size];
 
     // TODO(student): Generate random texture data
+    for (size_t i = 0; i < size; ++i)
+    {
+        data[i] = rand() % (UINT8_MAX + 1);
+    }
 
     // TODO(student): Generate and bind the new texture ID
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
 
     if (GLEW_EXT_texture_filter_anisotropic) {
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4);
     }
     // TODO(student): Set the texture parameters (MIN_FILTER, MAG_FILTER and WRAPPING MODE) using glTexParameteri
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     CheckOpenGLError();
@@ -261,7 +326,8 @@ Texture2D* Lab9::CreateRandomTexture(unsigned int width, unsigned int height)
     // Use glTexImage2D to set the texture data
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
-    // TODO(student): Generate texture mip-maps
+    // Generate texture mip-maps
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     CheckOpenGLError();
 
