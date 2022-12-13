@@ -12,6 +12,7 @@ namespace camera_implementation
         Camera()
         {
             position = glm::vec3(0, 2, 5);
+            center = glm::vec3(0, 1, 0);
             forward = glm::vec3(0, 0, -1);
             up = glm::vec3(0, 1, 0);
             right = glm::vec3(1, 0, 0);
@@ -30,6 +31,7 @@ namespace camera_implementation
         void Set(const glm::vec3& position, const glm::vec3& center, const glm::vec3& up)
         {
             this->position = position;
+            this->center = center;
             forward = glm::normalize(center - position);
             right = glm::cross(forward, up);
             this->up = glm::cross(right, forward);
@@ -166,6 +168,7 @@ namespace camera_implementation
     public:
         float distanceToTarget;
         glm::vec3 position;
+        glm::vec3 center;
         glm::vec3 forward;
         glm::vec3 right;
         glm::vec3 up;
