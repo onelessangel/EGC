@@ -14,7 +14,7 @@
 #define CAMERA_SENSITIVITY_OX	.002f
 #define CAMERA_SENSITIVITY_OY	.002f
 
-#define SCALE_PLAYER			glm::vec3(.004, .004, .004)
+#define SCALE_PLAYER			glm::vec3(.003, .003, .003)
 
 #define SLOPE_ANGLE				(M_PI / 6)
 
@@ -46,6 +46,8 @@ namespace m1
 		void OnWindowResize(int width, int height) override;
 
 		void CreateObjects();
+		void CreateShaders();
+		void LoadTextures();
 
 	protected:
 		skifree_camera::Camera *camera;
@@ -54,6 +56,10 @@ namespace m1
 
 		glm::mat4 modelMatrix;
 		std::unordered_map<std::string, Texture2D*> mapTextures;
+
+		glm::ivec2 resolution;
+		glm::vec2 currPos, playerPos, verticalDir, mouseDir;
+		float angle;
 
 		bool renderCameraTarget;
 		GLboolean mixTextures;

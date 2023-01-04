@@ -165,6 +165,11 @@ namespace skifree_camera
             return position + forward * distanceToTarget;
         }
 
+        glm::vec3 GetCameraPosition()
+        {
+            return position;
+        }
+
     public:
         float distanceToTarget;
         glm::vec3 position;

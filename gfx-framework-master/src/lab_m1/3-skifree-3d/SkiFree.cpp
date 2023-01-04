@@ -20,41 +20,32 @@ void SkiFree::Init()
 {
     // set camera
     renderCameraTarget = false;
+    angle = 0;
 
     camera = new skifree_camera::Camera();
-    //camera->Set(playerCenter + CAMERA_OFFSET, playerCenter - glm::vec3(0, -.2, 0), glm::vec3(0, 1, 0));
+    camera->Set(glm::vec3(0, 3, 9), glm::vec3(0), glm::vec3(0, 1, 0));
 
     // uncomment for global view camera
-    camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
+    //camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
 
     fov = RADIANS(60);
     width = 0;
     projectionMatrix = glm::perspective(fov, window->props.aspectRatio, 0.01f, 200.0f);
 
-    // Load textures
-    const string sourceTextureDir = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree", "ski_slope");
-
-    {
-        Texture2D* texture = new Texture2D();
-        texture->Load2D(PATH_JOIN(sourceTextureDir, "snow01.png").c_str(), GL_REPEAT);
-        mapTextures["terrain"] = texture;
-    }
-
-    {
-        Shader* shader = new Shader("TerrainShader");
-        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
-        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
-        shader->CreateAndLink();
-        shaders[shader->GetName()] = shader;
-    }
-
     CreateObjects();
+    CreateShaders();
+    LoadTextures();
+
+    resolution = window->GetResolution();
+    playerPos = glm::vec2(resolution.x / 2, resolution.y / 2);
+
+   /* cout << resolution.x << "\n";
+    cout << resolution.x / 2 << "\n";*/
 }
 
 void SkiFree::CreateObjects()
 {
     Mesh* terrain = new Mesh("terrain");
-    //terrain->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/ski_slope"), "ski_slope.fbx");
     terrain->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/ski_slope"), "ground.obj");
     AddMeshToList(terrain);
 
@@ -97,6 +88,31 @@ void SkiFree::CreateObjects()
     Mesh* gift4 = new Mesh("gift4");
     gift4->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/gift4"), "gift4.fbx");
     AddMeshToList(gift4);
+
+    Mesh* mesh = new Mesh("sphere");
+    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
+    meshes[mesh->GetMeshID()] = mesh;
+}
+
+void SkiFree::CreateShaders()
+{
+    Shader* shader = new Shader("TerrainShader");
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+    shader->CreateAndLink();
+    shaders[shader->GetName()] = shader;
+}
+
+
+void SkiFree::LoadTextures()
+{
+    const string sourceTextureDir = PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree", "ski_slope");
+
+    {
+        Texture2D* texture = new Texture2D();
+        texture->Load2D(PATH_JOIN(sourceTextureDir, "snow01.png").c_str(), GL_REPEAT);
+        mapTextures["terrain"] = texture;
+    }
 }
 
 
@@ -106,7 +122,7 @@ void SkiFree::FrameStart()
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::ivec2 resolution = window->GetResolution();
+    /*glm::ivec2 resolution = window->GetResolution();*/
     // Sets the screen area where to draw
     glViewport(0, 0, resolution.x, resolution.y);
 }
@@ -114,17 +130,32 @@ void SkiFree::FrameStart()
 
 void SkiFree::Update(float deltaTimeSeconds)
 {
+    // render player
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_PLAYER);
     modelMatrix *= transform_3d::RotateOY(M_PI / 2);
     modelMatrix *= transform_3d::RotateOZ(SLOPE_ANGLE);
+    modelMatrix *= transform_3d::RotateOY(angle);
     RenderMesh(meshes["player"], shaders["Simple"], modelMatrix);
 
+ /*   modelMatrix = glm::mat4(1);
+    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, );
+    modelMatrix = glm::scale(modelMatrix, SCALE_PLAYER);
+    RenderMesh(meshes["tree1"], shaders["Simple"], modelMatrix);*/
+
+    // render ground
     modelMatrix = glm::mat4(1);
-    //modelMatrix = glm::scale(modelMatrix, glm::vec3(.5, .5, .5));
     modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
-    //RenderMesh(meshes["terrain"], shaders["Simple"], modelMatrix);
     RenderSimpleMesh(meshes["terrain"], shaders["TerrainShader"], modelMatrix, mapTextures["terrain"]);
+
+    // render camera target - TO DELETE
+    if (renderCameraTarget)
+    {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+        RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
+    }
 }
 
 
@@ -147,6 +178,7 @@ void SkiFree::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatri
 
     mesh->Render();
 }
+
 
 void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1)
 {
@@ -171,8 +203,6 @@ void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& mode
         glUniform1f(locTime, -1.f);
     }
 
-    //glUniform1i(glGetUniformLocation(shader->program, "mix_textures"), mixTextures);
-
     if (texture1)
     {
         // Activate texture location 0
@@ -188,9 +218,8 @@ void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& mode
     // Draw the object
     glBindVertexArray(mesh->GetBuffers()->m_VAO);
     glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
-
-    //mesh->Render();
 }
+
 
 void SkiFree::OnInputUpdate(float deltaTime, int mods)
 {
@@ -233,6 +262,10 @@ void SkiFree::OnInputUpdate(float deltaTime, int mods)
 void SkiFree::OnKeyPress(int key, int mods)
 {
     // Add key press event
+    if (key == GLFW_KEY_T)
+    {
+        renderCameraTarget = !renderCameraTarget;
+    }
 }
 
 
@@ -258,6 +291,22 @@ void SkiFree::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
             camera->RotateThirdPerson_OY(CAMERA_SENSITIVITY_OY * -deltaX);
         }
     }
+
+    currPos.x = mouseX + deltaX;
+    currPos.y = mouseY + deltaY;
+
+    // ignore mouse if it is above player
+    if (currPos.y < playerPos.y) {
+        return;
+    }
+
+    verticalDir = glm::normalize(glm::vec2(resolution.x / 2, resolution.y) - playerPos);
+    mouseDir = glm::normalize(currPos - playerPos);
+
+    angle = -glm::orientedAngle(verticalDir, mouseDir);
+
+    // limit angle to 45 degrees
+    angle < 0 ? angle = MAX(angle, -M_PI_4) : angle = MIN(angle, M_PI_4);
 }
 
 
