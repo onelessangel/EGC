@@ -10,7 +10,7 @@ uniform mat4 Model;
 uniform mat4 View;
 uniform mat4 Projection;
 
-uniform float time;
+uniform vec2 translation;
 
 out vec2 texcoord;
 
@@ -18,11 +18,11 @@ void main()
 {
 	// Pass v_texture_coord as output to Fragment Shader
 	texcoord = v_texture_coord;
+	
+	float y = texcoord.y;
+	float x = texcoord.x;
 
-	if (time >= 0)
-	{
-		texcoord = vec2(-texcoord.y - time / 10, texcoord.x);
-	}
+	texcoord = vec2(x + translation.x / 50, y + translation.y / 50);
 
 	mat4 ModelView = View * Model;
 

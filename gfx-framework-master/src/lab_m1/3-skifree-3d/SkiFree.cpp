@@ -20,10 +20,9 @@ void SkiFree::Init()
 {
     // set camera
     renderCameraTarget = false;
-    angle = 0;
 
     camera = new skifree_camera::Camera();
-    camera->Set(glm::vec3(0, 3, 9), glm::vec3(0), glm::vec3(0, 1, 0));
+    camera->Set(CAMERA_OFFSET, glm::vec3(0), glm::vec3(0, 1, 0));
 
     // uncomment for global view camera
     //camera->Set(glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0));
@@ -32,16 +31,27 @@ void SkiFree::Init()
     width = 0;
     projectionMatrix = glm::perspective(fov, window->props.aspectRatio, 0.01f, 200.0f);
 
-    CreateObjects();
-    CreateShaders();
-    LoadTextures();
+    playerAngle = 0;
+    prevAngle = 0;
 
     resolution = window->GetResolution();
     playerPos = glm::vec2(resolution.x / 2, resolution.y / 2);
 
-   /* cout << resolution.x << "\n";
-    cout << resolution.x / 2 << "\n";*/
+    playerPos3D = glm::vec3(0, 0, 0);
+
+    translationStep = glm::vec3(0);
+
+    treePos.emplace_back(-1, 0, 4);
+
+    for (int i = 0; i < treePos.size(); i++) {
+        treePos[i] = ComputeTreePosition(treePos[0]);
+    }
+
+    CreateObjects();
+    CreateShaders();
+    LoadTextures();
 }
+
 
 void SkiFree::CreateObjects()
 {
@@ -94,6 +104,7 @@ void SkiFree::CreateObjects()
     meshes[mesh->GetMeshID()] = mesh;
 }
 
+
 void SkiFree::CreateShaders()
 {
     Shader* shader = new Shader("TerrainShader");
@@ -128,23 +139,66 @@ void SkiFree::FrameStart()
 }
 
 
+void SkiFree::UpdateTranslationStep(float deltaTimeSeconds)
+{
+    translationStep.z = deltaTimeSeconds * MOVEMENT_SPEED.z;
+    translationStep.y = -SLOPE_ANGLE_TAN * translationStep.z;
+
+    if (prevAngle < 0 && playerAngle > 0 ||
+        prevAngle > 0 && playerAngle < 0) {
+        translationStep.x = 0;
+    }
+    prevAngle = playerAngle;
+
+    if (playerAngle == 0)
+    {
+        translationStep.x = 0;
+    }
+    else if (playerAngle < 0)
+    {
+        translationStep.x = -cos(playerAngle) * deltaTimeSeconds * MOVEMENT_SPEED.x;
+    }
+    else
+    {
+        translationStep.x = cos(playerAngle) * deltaTimeSeconds * MOVEMENT_SPEED.x;
+    }
+}
+
+
+glm::vec3 SkiFree::ComputeTreePosition(glm::vec3 pos)
+{
+    // compute position using model offset and slope angle
+    glm::vec3 treePos = pos * TREE_SIZE_EQUIV;
+    treePos.x += TREE_OFFSET.x;
+    treePos.y = -SLOPE_ANGLE_TAN * treePos.z + TREE_OFFSET.y;
+    treePos.z += TREE_OFFSET.z;
+
+    return treePos;
+}
+
+
 void SkiFree::Update(float deltaTimeSeconds)
 {
+    UpdateTranslationStep(deltaTimeSeconds);
+
     // render player
+    playerPos3D += translationStep;
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_PLAYER);
+    modelMatrix = glm::translate(modelMatrix, playerPos3D * PLAYER_SIZE_EQUIV);
     modelMatrix *= transform_3d::RotateOY(M_PI / 2);
     modelMatrix *= transform_3d::RotateOZ(SLOPE_ANGLE);
-    modelMatrix *= transform_3d::RotateOY(angle);
+    modelMatrix *= transform_3d::RotateOY(playerAngle);
     RenderMesh(meshes["player"], shaders["Simple"], modelMatrix);
 
- /*   modelMatrix = glm::mat4(1);
-    modelMatrix = glm::translate(modelMatrix, glm::vec3(0, );
-    modelMatrix = glm::scale(modelMatrix, SCALE_PLAYER);
-    RenderMesh(meshes["tree1"], shaders["Simple"], modelMatrix);*/
+    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+    modelMatrix = glm::translate(modelMatrix, treePos[0]);
+    RenderMesh(meshes["tree1"], shaders["Simple"], modelMatrix);
 
     // render ground
     modelMatrix = glm::mat4(1);
+    modelMatrix = glm::translate(modelMatrix, playerPos3D);
     modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
     RenderSimpleMesh(meshes["terrain"], shaders["TerrainShader"], modelMatrix, mapTextures["terrain"]);
 
@@ -156,12 +210,15 @@ void SkiFree::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
         RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
     }
+
+    camera->Set(playerPos3D + CAMERA_OFFSET, playerPos3D, glm::vec3(0, 1, 0));
+    //camera->Set(glm::vec3(0) + CAMERA_OFFSET, glm::vec3(0), glm::vec3(0, 1, 0));
 }
 
 
 void SkiFree::FrameEnd()
 {
-    //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 
@@ -180,7 +237,7 @@ void SkiFree::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatri
 }
 
 
-void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1)
+void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
 {
     if (!mesh || !shader || !shader->GetProgramID())
         return;
@@ -191,28 +248,19 @@ void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& mode
     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    // Set any other shader uniforms that you need
-    GLint locTime = glGetUniformLocation(shader->program, "time");
-
-    if (mesh == meshes["terrain"])
-    {
-        glUniform1f(locTime, (GLfloat)Engine::GetElapsedTime());
-    }
-    else
-    {
-        glUniform1f(locTime, -1.f);
-    }
-
-    if (texture1)
+    GLint locTranslation = glGetUniformLocation(shader->program, "translation");
+    glUniform2fv(locTranslation, 1, glm::value_ptr(glm::vec2(playerPos3D.x, playerPos3D.z / glm::cos(SLOPE_ANGLE))));
+         
+    if (texture)
     {
         // Activate texture location 0
         glActiveTexture(GL_TEXTURE0);
 
         // Bind the texture1 ID
-        glBindTexture(GL_TEXTURE_2D, texture1->GetTextureID());
+        glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 
         // Send texture uniform value
-        glUniform1i(glGetUniformLocation(shader->program, "texture_1"), 0);
+        glUniform1i(glGetUniformLocation(shader->program, "texture"), 0);
     }
 
     // Draw the object
@@ -303,10 +351,20 @@ void SkiFree::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
     verticalDir = glm::normalize(glm::vec2(resolution.x / 2, resolution.y) - playerPos);
     mouseDir = glm::normalize(currPos - playerPos);
 
-    angle = -glm::orientedAngle(verticalDir, mouseDir);
+    playerAngle = -glm::orientedAngle(verticalDir, mouseDir);
 
-    // limit angle to 45 degrees
-    angle < 0 ? angle = MAX(angle, -M_PI_4) : angle = MIN(angle, M_PI_4);
+    // QUESTIONABLE :( -- in functie de camera zoom i guess
+    if (playerAngle < .005 && playerAngle > -.005) {
+        playerAngle = 0;
+    }
+
+    // limit angle to 90 degrees
+    if (playerAngle < 0) {
+        playerAngle = MAX(playerAngle, -MAX_PLAYER_ANGLE);
+    }
+    else {
+        playerAngle = MIN(playerAngle, MAX_PLAYER_ANGLE);
+    }
 }
 
 

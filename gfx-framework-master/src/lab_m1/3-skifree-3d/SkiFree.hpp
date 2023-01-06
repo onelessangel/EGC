@@ -10,13 +10,23 @@
 #include "lab_m1/3-skifree-3d/Camera.hpp"
 #include "lab_m1/3-skifree-3d/Transform3D.hpp"
 
+#define CAMERA_OFFSET			glm::vec3(0, 4, 10)
 #define CAMERA_SPEED			4.5f
 #define CAMERA_SENSITIVITY_OX	.002f
 #define CAMERA_SENSITIVITY_OY	.002f
 
-#define SCALE_PLAYER			glm::vec3(.003, .003, .003)
+#define MOVEMENT_SPEED			glm::vec3(.5, 0, .5)
 
-#define SLOPE_ANGLE				(M_PI / 6)
+#define SCALE_PLAYER			glm::vec3(.003, .003, .003)
+#define PLAYER_SIZE_EQUIV		(1 / SCALE_PLAYER.x)
+
+#define SCALE_TREE				glm::vec3(.01, .01, .01)
+#define TREE_SIZE_EQUIV			(1 / SCALE_TREE.x)
+#define TREE_OFFSET				(glm::vec3(.27, .6, -.1) * TREE_SIZE_EQUIV)
+
+#define MAX_PLAYER_ANGLE		M_PI_2
+#define SLOPE_ANGLE				(M_PI / 4)
+#define SLOPE_ANGLE_TAN			glm::tan(SLOPE_ANGLE)
 
 namespace m1
 {
@@ -49,6 +59,9 @@ namespace m1
 		void CreateShaders();
 		void LoadTextures();
 
+		void UpdateTranslationStep(float deltaTimeSeconds);
+		glm::vec3 ComputeTreePosition(glm::vec3 pos);
+
 	protected:
 		skifree_camera::Camera *camera;
 		glm::mat4 projectionMatrix;
@@ -59,7 +72,13 @@ namespace m1
 
 		glm::ivec2 resolution;
 		glm::vec2 currPos, playerPos, verticalDir, mouseDir;
-		float angle;
+		float playerAngle, prevAngle;
+		//bool movingLeft, movingRight;
+
+		std::vector<glm::vec3> treePos;
+
+		glm::vec3 playerPos3D;
+		glm::vec3 translationStep;
 
 		bool renderCameraTarget;
 		GLboolean mixTextures;
