@@ -58,6 +58,16 @@ void SkiFree::Init()
         giftPos[i] = ComputeGiftPosition(giftPos[0]);
     }*/
 
+    // Sun properties
+    /*{
+        lightPosition = glm::vec3(0, 1, 1);
+        materialShininess = 50;
+        materialKd = 0.5;
+        materialKs = 0.5;
+    }*/
+
+    isTerrain = true;
+
     CreateObjects();
     CreateShaders();
     LoadTextures();
@@ -123,11 +133,29 @@ void SkiFree::CreateObjects()
 
 void SkiFree::CreateShaders()
 {
-    Shader* shader = new Shader("TerrainShader");
-    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Terrain_VertexShader.glsl"), GL_VERTEX_SHADER);
-    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Terrain_FragmentShader.glsl"), GL_FRAGMENT_SHADER);
-    shader->CreateAndLink();
-    shaders[shader->GetName()] = shader;
+    {
+        Shader* shader = new Shader("SkiFreeShader");
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+        shader->CreateAndLink();
+        shaders[shader->GetName()] = shader;
+    }
+
+   /* {
+        Shader* shader = new Shader("MySimple");
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "MySimple_VertexShader.glsl"), GL_VERTEX_SHADER);
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "MySimple_FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+        shader->CreateAndLink();
+        shaders[shader->GetName()] = shader;
+    }*/
+
+   /* {
+        Shader* shader = new Shader("SunShader");
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Sun_VertexShader.glsl"), GL_VERTEX_SHADER);
+        shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Sun_FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+        shader->CreateAndLink();
+        shaders[shader->GetName()] = shader;
+    }*/
 }
 
 
@@ -215,7 +243,8 @@ glm::vec3 SkiFree::ComputeGiftPosition(glm::vec3 pos)
 
     return giftPos;
 }
- 
+
+
 bool SkiFree::CollidesObstacle(glm::vec3 obstaclePosition, ObjectType type)
 {
     float obstacleHitboxRange;
@@ -260,7 +289,7 @@ void SkiFree::Update(float deltaTimeSeconds)
     modelMatrix *= transform_3d::RotateOY(M_PI / 2);
     modelMatrix *= transform_3d::RotateOZ(SLOPE_ANGLE);
     modelMatrix *= transform_3d::RotateOY(playerAngle);
-    RenderMesh(meshes["player"], shaders["Simple"], modelMatrix);
+    RenderSimpleMesh(meshes["player"], shaders["SkiFreeShader"], modelMatrix);
 
     // render shape box
     //modelMatrix = glm::mat4(1);
@@ -277,7 +306,7 @@ void SkiFree::Update(float deltaTimeSeconds)
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
     modelMatrix = glm::translate(modelMatrix, ComputeTreePosition(treePos[0]));
-    RenderMesh(meshes["tree1"], shaders["Simple"], modelMatrix);
+    RenderSimpleMesh(meshes["tree1"], shaders["SkiFreeShader"], modelMatrix);
 
     if (CollidesObstacle(treePos[0], TREE)) {
         cout << "I've been hit: " << counter++ << "\n";
@@ -296,19 +325,29 @@ void SkiFree::Update(float deltaTimeSeconds)
     modelMatrix = glm::scale(modelMatrix, SCALE_LAMP_POST);
     modelMatrix = glm::translate(modelMatrix, ComputeLampPostPosition(lampPostPos[0]));
     modelMatrix *= transform_3d::RotateOY(M_PI / 2);
-    RenderMesh(meshes["lamp_post"], shaders["Simple"], modelMatrix);
+    RenderSimpleMesh(meshes["lamp_post"], shaders["SkiFreeShader"], modelMatrix);
 
     // render gift
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_GIFT);
     modelMatrix = glm::translate(modelMatrix, ComputeGiftPosition(giftPos[0]));
-    RenderMesh(meshes["gift4"], shaders["Simple"], modelMatrix);
+    RenderSimpleMesh(meshes["gift4"], shaders["SkiFreeShader"], modelMatrix);
 
     // render ground
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::translate(modelMatrix, playerPos3D);
     modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
-    RenderSimpleMesh(meshes["terrain"], shaders["TerrainShader"], modelMatrix, mapTextures["terrain"]);
+    RenderSimpleMesh(meshes["terrain"], shaders["SkiFreeShader"], modelMatrix, isTerrain, mapTextures["terrain"]);
+
+    // render point light
+    /*{
+        lightPosition = playerPos3D;
+        lightPosition.y += 1;
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, lightPosition);
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+        RenderMesh(meshes["sphere"], shaders["SunShader"], modelMatrix);
+    }*/
 
     camera->Set(playerPos3D + CAMERA_OFFSET, playerPos3D, glm::vec3(0, 1, 0));
     //camera->Set(glm::vec3(0) + CAMERA_OFFSET, glm::vec3(0), glm::vec3(0, 1, 0));
@@ -317,54 +356,77 @@ void SkiFree::Update(float deltaTimeSeconds)
 
 void SkiFree::FrameEnd()
 {
-    DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+    //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 
-void SkiFree::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
-{
-    if (!mesh || !shader || !shader->program)
-        return;
+//void SkiFree::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix)
+//{
+//    if (!mesh || !shader || !shader->program)
+//        return;
+//
+//    // Render an object using the specified shader and the specified position
+//    shader->Use();
+//    glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
+//    glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+//    glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+//
+//    mesh->Render();
+//}
 
-    // Render an object using the specified shader and the specified position
-    shader->Use();
-    glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
-    glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
-    glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
-    mesh->Render();
-}
-
-
-void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture)
+void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, bool isTerrain, Texture2D* texture)
 {
     if (!mesh || !shader || !shader->GetProgramID())
         return;
 
-
     shader->Use();
     glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
+
+    glm::vec3 eyePosition = camera->GetCameraPosition();
+    int eye_position = glGetUniformLocation(shader->program, "eye_position");
+    glUniform3f(eye_position, eyePosition.x, eyePosition.y, eyePosition.z);
+
+   /* glm::vec3 lightPosition = playerPos3D;
+    lightPosition.y += 1;
+    int locLightPosition = glGetUniformLocation(shader->program, "light_position");
+    glUniform3f(locLightPosition, lightPosition.x, lightPosition.y, lightPosition.z);*/
+
+    GLint locIsTerrain = glGetUniformLocation(shader->program, "is_terrain");
+    glUniform1i(locIsTerrain, isTerrain);
+
     GLint locTranslation = glGetUniformLocation(shader->program, "translation");
     glUniform2fv(locTranslation, 1, glm::value_ptr(glm::vec2(playerPos3D.x, playerPos3D.z / glm::cos(SLOPE_ANGLE))));
-         
+
     if (texture)
     {
-        // Activate texture location 0
+        // activate texture location 0
         glActiveTexture(GL_TEXTURE0);
 
-        // Bind the texture1 ID
+        // bind the texture1 ID
         glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 
-        // Send texture uniform value
+        // send texture uniform value
         glUniform1i(glGetUniformLocation(shader->program, "texture"), 0);
     }
 
-    // Draw the object
-    glBindVertexArray(mesh->GetBuffers()->m_VAO);
-    glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
+        //// Draw the object
+        //glBindVertexArray(mesh->GetBuffers()->m_VAO);
+        //glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
+    //}
+    if (isTerrain)
+    {
+        // Draw the object
+        glBindVertexArray(mesh->GetBuffers()->m_VAO);
+        glDrawElements(mesh->GetDrawMode(), static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, 0);
+    }
+    else
+    {
+        mesh->Render();
+    }
 }
 
 
@@ -447,6 +509,7 @@ void SkiFree::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         return;
     }
 
+    // compute angle
     verticalDir = glm::normalize(glm::vec2(resolution.x / 2, resolution.y) - playerPos);
     mouseDir = glm::normalize(currPos - playerPos);
 

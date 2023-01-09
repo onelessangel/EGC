@@ -64,8 +64,8 @@ namespace m1
 		void Update(float deltaTimeSeconds) override;
 		void FrameEnd() override;
 
-		void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix) override;
-		void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, Texture2D* texture1 = NULL);
+		//void RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix) override;
+		void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, bool isTerrain = false, Texture2D* texture1 = NULL);
 
 		void OnInputUpdate(float deltaTime, int mods) override;
 		void OnKeyPress(int key, int mods) override;
@@ -104,6 +104,13 @@ namespace m1
 
 		glm::vec3 playerPos3D;
 		glm::vec3 translationStep;
+
+		bool isTerrain;
+
+		/*glm::vec3 lightPosition;
+		unsigned int materialShininess;
+		float materialKd;
+		float materialKs;*/
 
 		bool renderCameraTarget;
 		GLboolean mixTextures;

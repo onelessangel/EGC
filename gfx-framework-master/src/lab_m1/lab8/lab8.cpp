@@ -117,7 +117,6 @@ void Lab8::Update(float deltaTimeSeconds)
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.25f));
         // TODO(student): Add or change the object colors
         RenderSimpleMesh(meshes["plane"], shaders["LabShader"], modelMatrix, glm::vec3(0.3396226, 0.3280882, 0.3280882));
-
     }
 
     // Render the point light in the scene
