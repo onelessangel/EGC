@@ -41,11 +41,22 @@ void SkiFree::Init()
 
     translationStep = glm::vec3(0);
 
-    treePos.emplace_back(-1, 0, 4);
+    treePos.emplace_back(0, 0, 6);
+    //treePos.emplace_back(0, 0, 7);
+    lampPostPos.emplace_back(0, 0, 8);
+    giftPos.emplace_back(0, 0, 10);
 
-    for (int i = 0; i < treePos.size(); i++) {
+   /* for (int i = 0; i < treePos.size(); i++) {
         treePos[i] = ComputeTreePosition(treePos[0]);
     }
+
+    for (int i = 0; i < lampPostPos.size(); i++) {
+        lampPostPos[i] = ComputeLampPostPosition(lampPostPos[0]);
+    }
+
+    for (int i = 0; i < giftPos.size(); i++) {
+        giftPos[i] = ComputeGiftPosition(giftPos[0]);
+    }*/
 
     CreateObjects();
     CreateShaders();
@@ -80,7 +91,7 @@ void SkiFree::CreateObjects()
     AddMeshToList(rock);
 
     Mesh* lampPost = new Mesh("lamp_post");
-    lampPost->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/lamp_post"), "lamp_post.fbx");
+    lampPost->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/lamp_post_long"), "lamp_post_long.fbx");
     AddMeshToList(lampPost);
 
     Mesh* gift1 = new Mesh("gift1");
@@ -99,17 +110,22 @@ void SkiFree::CreateObjects()
     gift4->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "skifree/gift4"), "gift4.fbx");
     AddMeshToList(gift4);
 
-    Mesh* mesh = new Mesh("sphere");
-    mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
-    meshes[mesh->GetMeshID()] = mesh;
+    // TESTING OBJECTS
+    Mesh* sphereMesh = new Mesh("sphere");
+    sphereMesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "sphere.obj");
+    meshes[sphereMesh->GetMeshID()] = sphereMesh;
+
+    Mesh* boxMesh = new Mesh("box");
+    boxMesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "primitives"), "box.obj");
+    meshes[boxMesh->GetMeshID()] = boxMesh;
 }
 
 
 void SkiFree::CreateShaders()
 {
     Shader* shader = new Shader("TerrainShader");
-    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "VertexShader.glsl"), GL_VERTEX_SHADER);
-    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "FragmentShader.glsl"), GL_FRAGMENT_SHADER);
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Terrain_VertexShader.glsl"), GL_VERTEX_SHADER);
+    shader->AddShader(PATH_JOIN(window->props.selfDir, SOURCE_PATH::M1, "3-skifree-3d", "shaders", "Terrain_FragmentShader.glsl"), GL_FRAGMENT_SHADER);
     shader->CreateAndLink();
     shaders[shader->GetName()] = shader;
 }
@@ -177,6 +193,61 @@ glm::vec3 SkiFree::ComputeTreePosition(glm::vec3 pos)
 }
 
 
+glm::vec3 SkiFree::ComputeLampPostPosition(glm::vec3 pos)
+{
+    // compute position using model offset and slope angle
+    glm::vec3 lampPostPos = pos * LAMP_POST_SIZE_EQUIV;
+    lampPostPos.x += LAMP_POST_OFFSET.x;
+    lampPostPos.y = -SLOPE_ANGLE_TAN * lampPostPos.z + LAMP_POST_OFFSET.y;
+    lampPostPos.z += LAMP_POST_OFFSET.z;
+
+    return lampPostPos;
+}
+
+
+glm::vec3 SkiFree::ComputeGiftPosition(glm::vec3 pos)
+{
+    // compute position using model offset and slope angle
+    glm::vec3 giftPos = pos * GIFT_SIZE_EQUIV;
+    giftPos.x += GIFT_OFFSET.x;
+    giftPos.y = -SLOPE_ANGLE_TAN * giftPos.z + GIFT_OFFSET.y;
+    giftPos.z += GIFT_OFFSET.z;
+
+    return giftPos;
+}
+ 
+bool SkiFree::CollidesObstacle(glm::vec3 obstaclePosition, ObjectType type)
+{
+    float obstacleHitboxRange;
+    
+    switch (type)
+    {
+        case GIFT:
+            obstacleHitboxRange = HITBOX_RANGE_GIFT;
+            break;
+    
+        case LAMP_POST:
+            obstacleHitboxRange = HITBOX_RANGE_LAMP_POST;
+            break;
+    
+        case TREE:
+            obstacleHitboxRange = HITBOX_RANGE_TREE;
+            break;
+    
+        default:
+            obstacleHitboxRange = 0;
+            break;
+    }
+
+    auto distance = sqrt(
+        (playerPos3D.x - obstaclePosition.x) * (playerPos3D.x - obstaclePosition.x) +
+        (playerPos3D.z - obstaclePosition.z) * (playerPos3D.z - obstaclePosition.z)
+    );
+
+    return distance < HITBOX_RANGE_PLAYER + obstacleHitboxRange;
+}
+
+
 void SkiFree::Update(float deltaTimeSeconds)
 {
     UpdateTranslationStep(deltaTimeSeconds);
@@ -191,25 +262,53 @@ void SkiFree::Update(float deltaTimeSeconds)
     modelMatrix *= transform_3d::RotateOY(playerAngle);
     RenderMesh(meshes["player"], shaders["Simple"], modelMatrix);
 
+    // render shape box
+    //modelMatrix = glm::mat4(1);
+    ////modelMatrix = glm::scale(modelMatrix, glm::vec3(.36, 1, 1.25)); // player
+    ////modelMatrix = glm::scale(modelMatrix, glm::vec3(.5, .2, .55)); // tree
+    ////modelMatrix = glm::scale(modelMatrix, glm::vec3(.15, .2, .15)); // lamp post
+    //modelMatrix = glm::scale(modelMatrix, glm::vec3(.4, .2, .4));     // gift
+    ////modelMatrix = glm::translate(modelMatrix, playerPos3D);
+    //modelMatrix *= transform_3d::RotateOZ(SLOPE_ANGLE);
+    ////modelMatrix *= transform_3d::RotateOY(playerAngle);
+    //RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
+
+    // render tree
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-    modelMatrix = glm::translate(modelMatrix, treePos[0]);
+    modelMatrix = glm::translate(modelMatrix, ComputeTreePosition(treePos[0]));
     RenderMesh(meshes["tree1"], shaders["Simple"], modelMatrix);
+
+    if (CollidesObstacle(treePos[0], TREE)) {
+        cout << "I've been hit: " << counter++ << "\n";
+    }
+
+    if (CollidesObstacle(lampPostPos[0], LAMP_POST)) {
+        cout << "I've been hit: " << counter++ << "\n";
+    }
+
+    if (CollidesObstacle(giftPos[0], GIFT)) {
+        cout << "I've been hit: " << counter++ << "\n";
+    }
+
+    // render lamp post  
+    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::scale(modelMatrix, SCALE_LAMP_POST);
+    modelMatrix = glm::translate(modelMatrix, ComputeLampPostPosition(lampPostPos[0]));
+    modelMatrix *= transform_3d::RotateOY(M_PI / 2);
+    RenderMesh(meshes["lamp_post"], shaders["Simple"], modelMatrix);
+
+    // render gift
+    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::scale(modelMatrix, SCALE_GIFT);
+    modelMatrix = glm::translate(modelMatrix, ComputeGiftPosition(giftPos[0]));
+    RenderMesh(meshes["gift4"], shaders["Simple"], modelMatrix);
 
     // render ground
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::translate(modelMatrix, playerPos3D);
     modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
     RenderSimpleMesh(meshes["terrain"], shaders["TerrainShader"], modelMatrix, mapTextures["terrain"]);
-
-    // render camera target - TO DELETE
-    if (renderCameraTarget)
-    {
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, camera->GetTargetPosition());
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-        RenderMesh(meshes["sphere"], shaders["VertexNormal"], modelMatrix);
-    }
 
     camera->Set(playerPos3D + CAMERA_OFFSET, playerPos3D, glm::vec3(0, 1, 0));
     //camera->Set(glm::vec3(0) + CAMERA_OFFSET, glm::vec3(0), glm::vec3(0, 1, 0));

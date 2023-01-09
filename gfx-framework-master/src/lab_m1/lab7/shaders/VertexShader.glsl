@@ -55,7 +55,7 @@ void main()
     // Compute light
     float d = distance(light_position, v_position);
     float attenuation_factor = 1 / (1 + 0.14 * d + 0.07 * d * d);
-    float light = ambient_light + attenuation_factor * (diffuse_light + specular_light);    // inmultim factorul de atenuare pentru intensitate
+    float light = ambient_light + 10 * attenuation_factor * (diffuse_light + specular_light);    // inmultim factorul de atenuare pentru intensitate
 
 
     // Send color light output to fragment shader
