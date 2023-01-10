@@ -15,7 +15,7 @@
 #define CAMERA_SENSITIVITY_OX	.002f
 #define CAMERA_SENSITIVITY_OY	.002f
 
-#define MOVEMENT_SPEED			glm::vec3(.3, 0, .3)
+#define MOVEMENT_SPEED			glm::vec3(.7, 0, .3)
 
 #define SCALE_PLAYER			glm::vec3(.003, .003, .003)
 #define PLAYER_SIZE_EQUIV		(1 / SCALE_PLAYER.x)
@@ -104,6 +104,7 @@ namespace m1
 
 		glm::vec3 playerPos3D;
 		glm::vec3 translationStep;
+		//std::vector<glm::vec3> 
 
 		bool isTerrain;
 

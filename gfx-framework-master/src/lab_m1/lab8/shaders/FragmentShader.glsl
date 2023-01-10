@@ -6,7 +6,7 @@ in vec3 world_normal;
 
 // Uniforms for light properties
 uniform vec3 light_direction;
-uniform vec3 light_position[3];
+uniform vec3 light_position[3]; 
 uniform vec3 eye_position;
 
 uniform float material_kd;
