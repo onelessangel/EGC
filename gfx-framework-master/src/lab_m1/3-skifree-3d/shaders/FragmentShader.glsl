@@ -24,10 +24,10 @@ float cut_off_angle = 30;
 vec3 object_light_dir = vec3(0, -1, 0);
 float ambient_light = 0.15;
 
-float get_directional_light() {
-	vec3 directional_light_dir = vec3(1, 1, 0);
+float get_directional_light()
+{
+	vec3 directional_light_dir = vec3(0, 1, 0);
 	
-	//vec3 color_light = vec3(1, 1, 1);
 	vec3 N = normalize(world_normal);
 	vec3 L = directional_light_dir;
 	vec3 V = normalize(eye_position - world_position);
@@ -37,28 +37,29 @@ float get_directional_light() {
 	float diffuse_light = material_kd * max(dot(N, L), 0);
 	float specular_light = 0;
 
-	if (diffuse_light > 0)
-    {
+	if (diffuse_light > 0) {
         specular_light = material_ks * pow(max(dot(V, R), 0), material_shininess);
     }
 
-	float sun_light = 2 * (diffuse_light + specular_light);
+	float sun_light = 1 * (diffuse_light + specular_light);
 
 	return sun_light;
 }
 
-float get_point_light(vec3 light_position) {
+float get_point_light(vec3 light_position)
+{
 	vec3 N = normalize(world_normal);
 	vec3 L = normalize(light_position - world_position);
 	vec3 V = normalize(eye_position - world_position);
 	vec3 H = normalize(L + V);
+	vec3 R = normalize(reflect(-L, normalize(world_normal)));
 
-	float diffuse_light = material_kd * max(dot(normalize(N), L), 0.f);
+	float diffuse_light = material_kd * max(dot(N, L), 0);
 	float specular_light = 0;
 
 	if (diffuse_light > 0) {
-		specular_light = material_ks * pow(max(dot(N, H), 0), material_shininess);
-	}
+        specular_light = material_ks * pow(max(dot(V, R), 0), material_shininess);
+    }
 
 	float d						= distance(light_position, world_position);
 	float attenuation_factor	= 1 / (1 + d * d);
@@ -67,18 +68,20 @@ float get_point_light(vec3 light_position) {
 	return light;
 }
 
-float get_spot_light(vec3 light_position) {
+float get_spot_light(vec3 light_position)
+{
 	vec3 N = normalize(world_normal);
 	vec3 L = normalize(light_position - world_position);
 	vec3 V = normalize(eye_position - world_position);
 	vec3 H = normalize(L + V);
+	vec3 R = normalize(reflect(-L, normalize(world_normal)));
 
-	float diffuse_light = material_kd * max(dot(normalize(N), L), 0.f);
+	float diffuse_light = material_kd * max(dot(N, L), 0);
 	float specular_light = 0;
 
 	if (diffuse_light > 0) {
-		specular_light = material_ks * pow(max(dot(N, H), 0), material_shininess);
-	}
+        specular_light = material_ks * pow(max(dot(V, R), 0), material_shininess);
+    }
 
 	float cut_off_rad		= radians(cut_off_angle);
 	float spot_light		= dot(-L, object_light_dir);
@@ -93,7 +96,7 @@ float get_spot_light(vec3 light_position) {
 		// Quadratic attenuation
 		float linear_att		= (spot_light - spot_light_limit) / (1.f - spot_light_limit);
 		float light_att_factor	= linear_att * linear_att;
-		light					= attenuation_factor * light_att_factor * (diffuse_light + specular_light);
+		light					= 5 * attenuation_factor * light_att_factor * (diffuse_light + specular_light);
 	}
 
 	return light;
@@ -117,6 +120,5 @@ void main()
 	// pt spot light
 	color += color1 * get_spot_light(vec3(0, -4 , 5)) * vec4(1, 0, 0, 0);
 
-	//out_color = color1 * ambient_light + color;
-	out_color = color;
+	out_color = color + color1 * ambient_light;
 } 
