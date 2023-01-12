@@ -41,10 +41,11 @@ void SkiFree::Init()
 
     translationStep = glm::vec3(0);
 
-    treePos.emplace_back(0, 0, 6);
-    //treePos.emplace_back(0, 0, 7);
-    lampPostPos.emplace_back(0, 0, 8);
-    giftPos.emplace_back(0, 0, 10);
+    //treePos.emplace_back(-25, 0, 8);
+    ////treePos.emplace_back(0, 0, 7);
+    //lampPostPos.emplace_back(-50, 0, 8);
+    //giftPos.emplace_back(0, 0, 6);
+    rockPos.emplace_back(0, 0, 6);
 
    /* for (int i = 0; i < treePos.size(); i++) {
         treePos[i] = ComputeTreePosition(treePos[0]);
@@ -58,19 +59,12 @@ void SkiFree::Init()
         giftPos[i] = ComputeGiftPosition(giftPos[0]);
     }*/
 
-    // Sun properties
-    /*{
-        lightPosition = glm::vec3(0, 1, 1);
-        materialShininess = 50;
-        materialKd = 0.5;
-        materialKs = 0.5;
-    }*/
-
     isTerrain = true;
 
     CreateObjects();
     CreateShaders();
     LoadTextures();
+    GenerateRandomObjects();
 }
 
 
@@ -155,6 +149,118 @@ void SkiFree::LoadTextures()
 }
 
 
+void SkiFree::GenerateRandomObjects()
+{
+    glm::vec3 pos;
+    ObjectType type;
+    int objectRange;
+
+    for (int i = 0; i < NMAX; i++) {
+        pos = glm::vec3(0);
+        type = ObjectType (rand() % 8);   // aici ar fi corect!!!!!!!!!!!
+
+        if (type == GIFT1 || type == GIFT2 || type == GIFT3 || type == GIFT4)
+        {
+            objectRange = 10;
+        }
+        else {
+            objectRange = 25;
+        }
+
+        pos.x = -objectRange + (rand() % (2 * objectRange + 1));
+        pos.z = rand() % 100;
+
+        //objects.push_back(ObjectProperties{ pos, type, true });
+        objects[i] = ObjectProperties{ pos, type, true };
+
+        //lightPosition.emplace_back(ComputeLightPosition(pos, type));
+        lightPosition[i] = ComputeLightPosition(pos, type);
+
+        if (type == GIFT1 || type == GIFT2 || type == GIFT3 || type == GIFT4)
+        {
+            lightType[i] = 0;
+            lightColor[i] = glm::vec3(1, 0, 0);
+            //objects[i].position = ComputeGiftPosition(objects[i].position);
+        }
+        else if (type == TREE1 || type == TREE2 || type == TREE3) {
+            lightType[i] = 0;
+            lightColor[i] = glm::vec3(0, 1, 0);
+            //objects[i].position = ComputeTreePosition(objects[i].position);
+        }
+        else if (type == LAMP_POST) {
+            lightType[i] = 1;
+            lightColor[i] = glm::vec3(0, 0, 1);
+            //objects[i].position = ComputeLampPostPosition(objects[i].position);
+        }
+
+        //switch (type)
+        //{
+        //    case GIFT1: case GIFT2: case GIFT3: case GIFT4:
+        //        /*lightType.emplace_back(0);
+        //        lightColor.emplace_back(glm::vec3(1, 0, 0));*/
+        //        //obj.position = ComputeGiftPosition(obj.position);
+        //        lightType
+        //        break;
+
+        //    case LAMP_POST:
+        //        /*lightType.emplace_back(1);
+        //        lightColor.emplace_back(glm::vec3(0.98, 0.95, 0.75));*/
+        //        //obj.position = ComputeLampPostPosition(obj.position);
+        //        break;
+
+        //    case TREE1: case TREE2: case TREE3:
+        //        /*lightType.emplace_back(0);
+        //        lightColor.emplace_back(glm::vec3(0, 1, 0));*/
+        //        //obj.position = ComputeTreePosition(obj.position);
+        //        break;
+
+        //    //case ROCK:
+        //        // rock case
+        //        //break;
+
+        //    default:
+        //        break;
+        //}
+    }
+
+    //sort(objects.begin(), objects.end(), sortFunc);
+
+    //for (auto obj : objects) {      // am folosit auto inainte auto obj : objects
+    //    //cout << obj.position.x << " " << obj.position.y << " " << obj.position.z << "\n";
+    //    //obj.type = ObjectType(rand() % 8);
+    //    lightPosition.emplace_back(ComputeLightPosition(obj.position, obj.type));
+
+    //    switch (obj.type)
+    //    {
+    //        case GIFT1: case GIFT2: case GIFT3: case GIFT4:
+    //            lightType.emplace_back(0);
+    //            lightColor.emplace_back(glm::vec3(1, 0, 0));
+    //            //obj.position = ComputeGiftPosition(obj.position);
+    //            break;
+
+    //        case LAMP_POST:
+    //            lightType.emplace_back(1);
+    //            lightColor.emplace_back(glm::vec3(0.98, 0.95, 0.75));
+    //            //obj.position = ComputeLampPostPosition(obj.position);
+    //            break;
+
+    //        case TREE1: case TREE2: case TREE3:
+    //            lightType.emplace_back(0);
+    //            lightColor.emplace_back(glm::vec3(0, 1, 0));
+    //            //obj.position = ComputeTreePosition(obj.position);
+    //            break;
+
+    //        //case ROCK:
+    //            // rock case
+    //            //break;
+
+    //        default:
+    //            break;
+    //    }
+    //}
+}
+
+
 void SkiFree::FrameStart()
 {
     // Clears the color buffer (using the previously set color) and depth buffer
@@ -229,13 +335,56 @@ glm::vec3 SkiFree::ComputeGiftPosition(glm::vec3 pos)
 }
 
 
+glm::vec3 SkiFree::ComputeRockPosition(glm::vec3 pos)
+{
+    // compute position using model offset and slope angle
+    glm::vec3 rockPos = pos * ROCK_SIZE_EQUIV;
+    rockPos.x += ROCK_OFFSET.x;
+    rockPos.y = -SLOPE_ANGLE_TAN * rockPos.z + ROCK_OFFSET.y;
+    rockPos.z += ROCK_OFFSET.z;
+
+    return rockPos;
+}
+
+
+glm::vec3 SkiFree::ComputeLightPosition(glm::vec3 pos, ObjectType objectType)
+{
+    glm::vec3 lightPos = glm::vec3(0);
+    glm::vec3 objectOffset = glm::vec3(0);
+
+    switch (objectType)
+    {
+        case GIFT1: case GIFT2: case GIFT3: case GIFT4:
+            lightPos = glm::vec3(pos.x, -SLOPE_ANGLE_TAN * pos.z, pos.z);
+            objectOffset = glm::vec3(0, .2, 0);
+            break;
+
+        case LAMP_POST:
+            lightPos = glm::vec3(pos.x, -SLOPE_ANGLE_TAN * pos.z + 1.5, pos.z);
+            objectOffset = glm::vec3(0, .4, .4);
+            break;
+
+        case TREE1: case TREE2: case TREE3:
+            lightPos = glm::vec3(pos.x, -SLOPE_ANGLE_TAN * pos.z, pos.z);
+            objectOffset = glm::vec3(0, .5, 1);
+            break;
+
+        default:
+            objectOffset = glm::vec3(0);
+            break;
+    }
+
+    return lightPos + objectOffset;
+}
+
+
 bool SkiFree::CollidesObstacle(glm::vec3 obstaclePosition, ObjectType type)
 {
     float obstacleHitboxRange;
     
     switch (type)
     {
-        case GIFT:
+        case GIFT1: case GIFT2: case GIFT3: case GIFT4:
             obstacleHitboxRange = HITBOX_RANGE_GIFT;
             break;
     
@@ -243,9 +392,12 @@ bool SkiFree::CollidesObstacle(glm::vec3 obstaclePosition, ObjectType type)
             obstacleHitboxRange = HITBOX_RANGE_LAMP_POST;
             break;
     
-        case TREE:
+        case TREE1: case TREE2: case TREE3:
             obstacleHitboxRange = HITBOX_RANGE_TREE;
             break;
+
+        /*case ROCK:
+            break;*/
     
         default:
             obstacleHitboxRange = 0;
@@ -266,7 +418,7 @@ void SkiFree::Update(float deltaTimeSeconds)
     UpdateTranslationStep(deltaTimeSeconds);
 
     // render player
-    playerPos3D += translationStep;
+    //playerPos3D += translationStep;
     modelMatrix = glm::mat4(1);
     modelMatrix = glm::scale(modelMatrix, SCALE_PLAYER);
     modelMatrix = glm::translate(modelMatrix, playerPos3D * PLAYER_SIZE_EQUIV);
@@ -274,6 +426,25 @@ void SkiFree::Update(float deltaTimeSeconds)
     modelMatrix *= transform_3d::RotateOZ(SLOPE_ANGLE);
     modelMatrix *= transform_3d::RotateOY(playerAngle);
     RenderSimpleMesh(meshes["player"], shaders["SkiFreeShader"], modelMatrix);
+
+    // render ground
+    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::translate(modelMatrix, playerPos3D);
+    modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
+    RenderSimpleMesh(meshes["terrain"], shaders["SkiFreeShader"], modelMatrix, isTerrain, mapTextures["terrain"]);
+
+    modelMatrix = glm::mat4(1);
+    modelMatrix = glm::scale(modelMatrix, SCALE_ROCK);
+    modelMatrix = glm::translate(modelMatrix, ComputeRockPosition(glm::vec3(0, 0, 3)));
+    //modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
+    RenderSimpleMesh(meshes["rock"], shaders["SkiFreeShader"], modelMatrix);
+
+   /* {
+        glm::mat4 modelMatrix = glm::mat4(1);
+        modelMatrix = glm::translate(modelMatrix, ComputeLightPosition(giftPos[0], GIFT));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(1, 1, 1));
+        RenderSimpleMesh(meshes["sphere"], shaders["SkiFreeShader"], modelMatrix);
+    }*/
 
     // render shape box
     //modelMatrix = glm::mat4(1);
@@ -286,13 +457,7 @@ void SkiFree::Update(float deltaTimeSeconds)
     ////modelMatrix *= transform_3d::RotateOY(playerAngle);
     //RenderMesh(meshes["box"], shaders["VertexNormal"], modelMatrix);
 
-    // render tree
-    /*modelMatrix = glm::mat4(1);
-    modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
-    modelMatrix = glm::translate(modelMatrix, ComputeTreePosition(treePos[0]));
-    RenderSimpleMesh(meshes["tree1"], shaders["SkiFreeShader"], modelMatrix);*/
-
-    if (CollidesObstacle(treePos[0], TREE)) {
+    /*if (CollidesObstacle(treePos[0], TREE)) {
         cout << "I've been hit: " << counter++ << "\n";
     }
 
@@ -302,46 +467,117 @@ void SkiFree::Update(float deltaTimeSeconds)
 
     if (CollidesObstacle(giftPos[0], GIFT)) {
         cout << "I've been hit: " << counter++ << "\n";
-    }
-
-    // render lamp post  
-    modelMatrix = glm::mat4(1);
-    modelMatrix = glm::scale(modelMatrix, SCALE_LAMP_POST);
-    modelMatrix = glm::translate(modelMatrix, ComputeLampPostPosition(lampPostPos[0]));
-    modelMatrix *= transform_3d::RotateOY(M_PI / 2);
-    RenderSimpleMesh(meshes["lamp_post"], shaders["SkiFreeShader"], modelMatrix);
-
-    // render gift
-    modelMatrix = glm::mat4(1);
-    modelMatrix = glm::scale(modelMatrix, SCALE_GIFT);
-    modelMatrix = glm::translate(modelMatrix, ComputeGiftPosition(giftPos[0]));
-    modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
-    RenderSimpleMesh(meshes["gift4"], shaders["SkiFreeShader"], modelMatrix);
-
-    // render ground
-    modelMatrix = glm::mat4(1);
-    modelMatrix = glm::translate(modelMatrix, playerPos3D);
-    modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
-    RenderSimpleMesh(meshes["terrain"], shaders["SkiFreeShader"], modelMatrix, isTerrain, mapTextures["terrain"]);
-
-    // render point light
-    /*{
-        lightPosition = playerPos3D;
-        lightPosition.y += 1;
-        glm::mat4 modelMatrix = glm::mat4(1);
-        modelMatrix = glm::translate(modelMatrix, lightPosition);
-        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-        RenderMesh(meshes["sphere"], shaders["SunShader"], modelMatrix);
     }*/
 
-    camera->Set(playerPos3D + CAMERA_OFFSET, playerPos3D, glm::vec3(0, 1, 0));
-    //camera->Set(glm::vec3(0) + CAMERA_OFFSET, glm::vec3(0), glm::vec3(0, 1, 0));
+    // render objects
+    for (int i = 0; i < NMAX; i++) {
+        // hide object if it is not visible
+        /*if (!objects[i].visible) {
+            continue;
+        }*/
+
+        // mark object as not visible if too far
+        if (abs(playerPos3D.z - objects[i].position.z) / SLOPE_ANGLE_COS > TERRAIN_SIZE_HALF)
+        {
+            objects[i].visible = false;
+            continue;
+        }
+
+        if (abs((playerPos3D.z - objects[i].position.z)) / SLOPE_ANGLE_COS < TERRAIN_SIZE_HALF)
+        {
+            objects[i].visible = true;
+        }
+
+        // render object if it is in viewport
+        if (objects[i].visible) {
+            //RenderObject(objects[i]);
+        }
+    }
+
+    //camera->Set(playerPos3D + CAMERA_OFFSET, playerPos3D, glm::vec3(0, 1, 0));
 }
     
 
 void SkiFree::FrameEnd()
 {
     //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
+}
+
+void SkiFree::RenderObject(ObjectProperties obj)
+{
+    string meshName;
+
+    if (obj.type == GIFT1 || obj.type == GIFT2 || obj.type == GIFT3 || obj.type == GIFT4)
+    {
+        switch (obj.type)
+        {
+            case GIFT1:
+                meshName = "gift1";
+                break;
+
+            case GIFT2:
+                meshName = "gift2";
+                break;
+
+            case GIFT3:
+                meshName = "gift3";
+                break;
+
+            case GIFT4:
+                meshName = "gift4";
+                break;
+
+            default:
+                meshName = "gift1";
+                break;
+        }
+
+        modelMatrix = glm::mat4(1);
+        modelMatrix = glm::scale(modelMatrix, SCALE_GIFT);
+        modelMatrix = glm::translate(modelMatrix, ComputeGiftPosition(obj.position));
+        modelMatrix *= transform_3d::RotateOX(SLOPE_ANGLE);
+        RenderSimpleMesh(meshes[meshName], shaders["SkiFreeShader"], modelMatrix);
+    }
+    else if (obj.type == TREE1 || obj.type == TREE2 || obj.type == TREE3)
+    {
+        switch (obj.type)
+        {
+        case TREE1:
+            meshName = "tree1";
+            break;
+
+        case TREE2:
+            meshName = "tree2";
+            break;
+
+        case TREE3:
+            meshName = "tree3";
+            break;
+
+        default:
+            meshName = "tree1";
+            break;
+        }
+
+        modelMatrix = glm::mat4(1);
+        modelMatrix = glm::scale(modelMatrix, SCALE_TREE);
+        modelMatrix = glm::translate(modelMatrix, ComputeTreePosition(obj.position));
+        RenderSimpleMesh(meshes[meshName], shaders["SkiFreeShader"], modelMatrix);
+    }
+    else if (obj.type == LAMP_POST)
+    {
+        meshName = "lamp_post";
+
+        modelMatrix = glm::mat4(1);
+        modelMatrix = glm::scale(modelMatrix, SCALE_LAMP_POST);
+        modelMatrix = glm::translate(modelMatrix, ComputeLampPostPosition(obj.position));
+        modelMatrix *= transform_3d::RotateOY(M_PI / 2);
+        RenderSimpleMesh(meshes["lamp_post"], shaders["SkiFreeShader"], modelMatrix);
+    }
+    //else if (obj.type == ROCK)
+    //{
+    //    // rock code
+    //}
 }
 
 
@@ -354,21 +590,31 @@ void SkiFree::RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& mode
     glUniformMatrix4fv(shader->loc_view_matrix, 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
     glUniformMatrix4fv(shader->loc_projection_matrix, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(shader->loc_model_matrix, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-
+    
     glm::vec3 eyePosition = camera->GetCameraPosition();
     int eye_position = glGetUniformLocation(shader->program, "eye_position");
     glUniform3f(eye_position, eyePosition.x, eyePosition.y, eyePosition.z);
 
-    int locLight = glGetUniformLocation(shader->program, "light_position");
-    glUniform3fv(locLight, 1, glm::value_ptr(ComputeTreePosition(treePos[0]) + glm::vec3(0, 1, 0)));
+    int material_ks = glGetUniformLocation(shader->program, "material_ks");
+    if (isTerrain) {
+        glUniform1f(material_ks, TERRAIN_KS);
+    }
+    else {
+        glUniform1f(material_ks, OBJECT_KS);
+    }
+    
+    GLint locLight = glGetUniformLocation(shader->program, "light_position");
+    glUniform3fv(locLight, NMAX, glm::value_ptr(lightPosition[0]));
+
+   /* glm::vec3 pos = ComputeLightPosition(treePos[0], TREE);
+    cout << pos.x << " " << pos.y << " " << pos.z << "\n";*/
 
     GLint locLightType = glGetUniformLocation(shader->program, "type_of_light");
-    glUniform1i(locLightType, 0); // nu e spotlight (pt spotlight ar fi 1)
+    //glUniform1iv(locLightType, NMAX, glm::value_ptr(lightType[0])); 
+    glUniform1iv(locLightType, NMAX, &(lightType[0])); // nu e spotlight (pt spotlight ar fi 1)
 
-   /* glm::vec3 lightPosition = playerPos3D;
-    lightPosition.y += 1;
-    int locLightPosition = glGetUniformLocation(shader->program, "light_position");
-    glUniform3f(locLightPosition, lightPosition.x, lightPosition.y, lightPosition.z);*/
+    GLint locLightColor = glGetUniformLocation(shader->program, "light_color");
+    glUniform3fv(locLightColor, NMAX, glm::value_ptr(lightColor[0]));
 
     GLint locIsTerrain = glGetUniformLocation(shader->program, "is_terrain");
     glUniform1i(locIsTerrain, isTerrain);

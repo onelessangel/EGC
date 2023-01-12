@@ -16,9 +16,6 @@ uniform vec2 translation;
 
 // Output
 out vec2 texcoord;
-
-//out vec3 position;
-
 out vec3 world_position;
 out vec3 world_normal;
 
@@ -33,8 +30,6 @@ void main()
 	if (is_terrain) {
 		texcoord = vec2(x + translation.x / 50, y + translation.y / 50);
 	}
-
-	// position = v_position;
 
 	world_position = (Model * vec4(v_position, 1)).xyz;
 	world_normal = normalize(mat3(Model) * normalize(v_normal));
