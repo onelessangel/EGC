@@ -18,7 +18,6 @@ layout(location = 0) out vec4 out_color;
 
 float material_shininess = 50;
 float material_kd = 0.5;
-// float material_ks = 0.5;
 float cut_off_angle = 30;
 float ambient_light = 0.15;
 float spot_offset = 1;
@@ -63,7 +62,7 @@ float get_point_light(vec3 light_position)
 
 	float d						= distance(light_position, world_position);
 	float attenuation_factor	= 1 / (1 + d);
-	float light					= attenuation_factor * (diffuse_light + specular_light);
+	float light					= 2 * attenuation_factor * (diffuse_light + specular_light);
 
 	return light;
 }
@@ -95,7 +94,7 @@ float get_spot_light(vec3 light_position) {
 		// Quadratic attenuation
 		float linear_att		= (spot_light - spot_light_limit) / (1.f - spot_light_limit);
 		float light_att_factor	= linear_att * linear_att;
-		light					= 5 * attenuation_factor * light_att_factor * (diffuse_light + specular_light);
+		light					= 2 * attenuation_factor * light_att_factor * (diffuse_light + specular_light);
 	}
 
 	return light; 
@@ -115,24 +114,12 @@ void main()
 
 	for (int i = 0; i < 200; i++) {
 		if (type_of_light[i] == 0) {
-			//color += color1 * get_point_light(light_position[i]) * vec4(1, 0, 0, 0);
 			color += color1 * get_point_light(light_position[i]) * vec4(light_color[i].xyz, 0);
-		} else {
-			//color += color1 * get_spot_light(light_position[i] + vec3(-spot_offset, 0, 0)) * vec4(0, 0, 1, 0);
-			//color += color1 * get_spot_light(light_position[i] + vec3(spot_offset, 0, 0)) * vec4(0, 0, 1, 0);
+		} else if (type_of_light[i] == 1) {
 			color += color1 * get_spot_light(light_position[i] + vec3(-spot_offset, 0, 0)) * vec4(light_color[i].xyz, 0);
 			color += color1 * get_spot_light(light_position[i] + vec3(spot_offset, 0, 0)) * vec4(light_color[i].xyz, 0);
 		}
 	}
-
-	// pt point light
-	//color += color1 * get_point_light(light_position[0]) * vec4(1, 0, 0, 0);
-
-	// pt spot light
-	//color += color1 * get_spot_light(vec3(0, -4.4, 6.4)) * vec4(0, 0, 1, 0);
-	// send offset s uniform
-	//color += color1 * get_spot_light(vec3(-1 + light_position[0].x, light_position[0].y, light_position[0].z)) * vec4(0, 0, 1, 0);
-	//color += color1 * get_spot_light(vec3(1 + light_position[0].x, light_position[0].y, light_position[0].z)) * vec4(0, 0, 1, 0);
 
 	out_color = color + color1 * ambient_light;
 } 

@@ -17,7 +17,10 @@
 #define CAMERA_SENSITIVITY_OX	.002f
 #define CAMERA_SENSITIVITY_OY	.002f
 
-#define MOVEMENT_SPEED			glm::vec3(1, 0, 1)
+#define BIG_FONT_SIZE			100
+#define MEDIUM_FONT_SIZE		75
+
+#define MOVEMENT_SPEED			glm::vec3(1.4, 0, 1)
 
 #define SCALE_PLAYER			glm::vec3(.003, .003, .003)
 #define PLAYER_SIZE_EQUIV		(1 / SCALE_PLAYER.x)
@@ -36,14 +39,13 @@
 
 #define SCALE_ROCK				glm::vec3(.007, .007, .007)
 #define ROCK_SIZE_EQUIV			(1 / SCALE_ROCK.x)
-#define ROCK_OFFSET				(glm::vec3(0, .5, 0) * ROCK_SIZE_EQUIV)
+#define ROCK_OFFSET				(glm::vec3(0, .2, 0) * ROCK_SIZE_EQUIV)
 
 #define TERRAIN_SIZE			50
 #define TERRAIN_SIZE_HALF		(TERRAIN_SIZE / 2)
 
 #define MAX_PLAYER_ANGLE		M_PI_2
 #define SLOPE_ANGLE				(M_PI / 4)
-//#define SLOPE_ANGLE				0
 #define SLOPE_ANGLE_TAN			glm::tan(SLOPE_ANGLE)
 #define SLOPE_ANGLE_COS			glm::cos(SLOPE_ANGLE)
 
@@ -51,15 +53,10 @@
 #define HITBOX_RANGE_TREE		.275f
 #define HITBOX_RANGE_LAMP_POST	.075f
 #define HITBOX_RANGE_GIFT		.2f
-#define HITBOX_RANGE_ROCK		.36f
+#define HITBOX_RANGE_ROCK		.25f
 
 #define OBJECT_KS				.5
 #define TERRAIN_KS				0
-
-//#define HITBOX_PLAYER			(glm::vec3(.36, 0, 1.25) * .5f)
-//#define HITBOX_TREE				(glm::vec3(.5, 0, .55)	 * .5f)
-//#define HITBOX_LAMP_POST		(glm::vec3(.15, 0, .15)  * .5f)
-//#define HITBOX_GIFT				(glm::vec3(.4, 0, .4)	 * .5f)
 
 namespace m1
 {
@@ -72,11 +69,7 @@ namespace m1
 		void Init() override;
 
 	protected:
-		//enum EntityType { TERRAIN, PLAYER, GIFT, LAMP_POST, TREE };
-
-		enum ObjectType { TREE1, TREE2, TREE3, LAMP_POST, GIFT1, GIFT2, GIFT3, GIFT4}; // de adaugat piatra
-		
-		//enum LightType { POINT, SPOT };
+		enum ObjectType { TREE1, TREE2, TREE3, LAMP_POST1, LAMP_POST2, GIFT1, GIFT2, GIFT3, GIFT4, ROCK1, ROCK2}; // de adaugat piatra
 
 	public:
 		struct ObjectProperties
@@ -84,20 +77,10 @@ namespace m1
 			glm::vec3 position;
 			ObjectType type;
 			bool visible;
+			bool collected;
 		};
 
-		//struct LightProperties
-		//{
-		//	glm::vec3 position;
-		//	int typeOfLight;	// POINT - 0; SPOT - 1
-		//};
-
-		struct {
-			bool operator() (ObjectProperties a, ObjectProperties b) const { return a.position.z < b.position.z; }
-		} sortFunc;
-
 	private:
-
 		void FrameStart() override;
 		void Update(float deltaTimeSeconds) override;
 		void FrameEnd() override;
@@ -114,6 +97,8 @@ namespace m1
 		void CreateObjects();
 		void CreateShaders();
 		void LoadTextures();
+
+		void NewGameInit();
 		void GenerateRandomObjects();
 
 		void UpdateTranslationStep(float deltaTimeSeconds);
@@ -123,30 +108,30 @@ namespace m1
 		glm::vec3 ComputeRockPosition(glm::vec3 pos);
 		glm::vec3 ComputeLightPosition(glm::vec3 pos, ObjectType objectType);
 
-		void RenderObject(ObjectProperties obj);
+		void RenderPlayer();
+		void RenderGround();
+		void RenderObjects();
+		void RenderSingleObject(ObjectProperties obj);
 		void RenderSimpleMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, bool isTerrain = false, Texture2D* texture1 = NULL);
 
 		bool CollidesObstacle(glm::vec3 obstaclePosition, ObjectType type);
+		void CheckCollision(ObjectProperties* obj, int pos);
 
 	protected:
 		skifree_camera::Camera *camera;
 		glm::mat4 projectionMatrix;
 		GLfloat fov, width;
+		glm::ivec2 resolution;
 
 		glm::mat4 modelMatrix;
 		std::unordered_map<std::string, Texture2D*> mapTextures;
-
-		glm::ivec2 resolution;
+		
 		glm::vec2 currPos, playerPos, verticalDir, mouseDir;
 		float playerAngle, prevAngle;
 
-		/*std::vector<glm::vec3> treePos;
-		std::vector<glm::vec3> lampPostPos;
-		std::vector<glm::vec3> giftPos;*/
-		std::vector<glm::vec3> rockPos;
 		ObjectProperties objects[NMAX];
 		glm::vec3 lightPosition[NMAX];
-		int lightType[NMAX];			// POINT - 0; SPOT - 1
+		int lightType[NMAX];			// POINT - 0; SPOT - 1; INVISIBLE - 2
 		glm::vec3 lightColor[NMAX];
 
 		glm::vec3 playerPos3D;
@@ -154,9 +139,9 @@ namespace m1
 
 		bool isTerrain;
 
-		bool renderCameraTarget;
-		GLboolean mixTextures;
-		int counter = 0;
+		int score, maxScore;
+		bool freezeGame;
+		bool newHighScore;
 	};
 
 }	// namespace m1
